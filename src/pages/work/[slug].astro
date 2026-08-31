@@ -2,6 +2,7 @@
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import Prose from '../../components/Prose.astro';
 import Figures from '../../components/Figures.astro';
+import VideoEmbed from '../../components/VideoEmbed.astro';
 import Icon from '../../components/Icon.astro';
 import { getProjectSlugs, getProjectBySlug } from '../../lib/content';
 import { thumbUrl, imageAlt } from '../../lib/image';
@@ -132,16 +133,12 @@ const videos = (project.videos ?? []).filter(Boolean);
     {
       videos.length > 0 && (
         <section class="cs__section">
-          <h2>Video</h2>
-          <ul class="cs__videos">
+          <h2>{videos.length > 1 ? 'Videos' : 'Video'}</h2>
+          <div class="cs__videos">
             {videos.map((v) => (
-              <li>
-                <a href={v} target="_blank" rel="noopener noreferrer" class="cs__link">
-                  {v} <Icon name="external" size={14} />
-                </a>
-              </li>
+              <VideoEmbed url={v} title={`${project.name} — video`} />
             ))}
-          </ul>
+          </div>
         </section>
       )
     }
@@ -215,11 +212,14 @@ const videos = (project.videos ?? []).filter(Boolean);
   .cs__section h2 {
     font-size: var(--text-1);
   }
-  .cs__todo,
-  .cs__videos {
+  .cs__todo {
     color: var(--text-faint);
     font-family: var(--font-mono);
     font-size: var(--text--1);
-    word-break: break-all;
+  }
+  .cs__videos {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-m);
   }
 </style>

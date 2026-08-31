@@ -2,6 +2,7 @@
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import Prose from '../../components/Prose.astro';
 import Figures from '../../components/Figures.astro';
+import VideoEmbed from '../../components/VideoEmbed.astro';
 import Icon from '../../components/Icon.astro';
 import { getSystemsLabSlugs, getSystemsLabEntryBySlug } from '../../lib/content';
 
@@ -100,9 +101,7 @@ const sections: { title: string; text?: string }[] = [
       entry.video && (
         <section class="cs__section">
           <h2>Video</h2>
-          <a href={entry.video} target="_blank" rel="noopener noreferrer" class="cs__link">
-            {entry.video} <Icon name="external" size={14} />
-          </a>
+          <VideoEmbed url={entry.video} title={`${entry.title} — video`} />
         </section>
       )
     }

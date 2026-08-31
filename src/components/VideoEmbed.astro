@@ -1,0 +1,176 @@
+---
+/**
+ * YouTube / Vimeo linkini sitede GÖMÜLÜ oynatıcıya çevirir.
+ * Performans: önce sadece kapak görseli + play tuşu gösterilir; kullanıcı
+ * tıklayınca <iframe> yüklenir (autoplay). Böylece sayfa açılışı hızlı kalır.
+ * Link tanınmazsa düz bağlantıya düşer.
+ */
+import Icon from './Icon.astro';
+
+interface Props {
+  url: string;
+  title?: string;
+}
+const { url, title = 'Project video' } = Astro.props;
+
+type Parsed = { provider: 'youtube' | 'vimeo'; id: string };
+
+function parseVideo(raw: string): Parsed | null {
+  try {
+    const u = new URL(raw.trim());
+    const host = u.hostname.replace(/^www\./, '');
+
+    if (host === 'youtu.be') {
+      const id = u.pathname.split('/').filter(Boolean)[0];
+      return id ? { provider: 'youtube', id } : null;
+    }
+    if (host.endsWith('youtube.com') || host.endsWith('youtube-nocookie.com')) {
+      if (u.pathname === '/watch') {
+        const id = u.searchParams.get('v');
+        return id ? { provider: 'youtube', id } : null;
+      }
+      const m = u.pathname.match(/^\/(?:embed|shorts|v|live)\/([^/?#]+)/);
+      if (m) return { provider: 'youtube', id: m[1] };
+    }
+    if (host === 'vimeo.com') {
+      const m = u.pathname.match(/\/(\d+)/);
+      if (m) return { provider: 'vimeo', id: m[1] };
+    }
+    if (host === 'player.vimeo.com') {
+      const m = u.pathname.match(/\/video\/(\d+)/);
+      if (m) return { provider: 'vimeo', id: m[1] };
+    }
+  } catch {
+    /* geçersiz URL */
+  }
+  return null;
+}
+
+const v = parseVideo(url);
+
+const embedSrc = v
+  ? v.provider === 'youtube'
+    ? `https://www.youtube-nocookie.com/embed/${v.id}?autoplay=1&rel=0&modestbranding=1`
+    : `https://player.vimeo.com/video/${v.id}?autoplay=1`
+  : null;
+
+const poster =
+  v?.provider === 'youtube' ? `https://i.ytimg.com/vi/${v.id}/hqdefault.jpg` : null;
+---
+
+{
+  v ? (
+    <div
+      class="video"
+      data-video
+      data-embed={embedSrc}
+      data-title={title}
+      style={poster ? `--poster: url("${poster}")` : undefined}
+    >
+      <button type="button" class="video__btn" data-video-play>
+        <span class="video__play" aria-hidden="true">
+          <Icon name="play" size={24} />
+        </span>
+        <span class="visually-hidden">Play video</span>
+      </button>
+    </div>
+  ) : (
+    <a href={url} target="_blank" rel="noopener noreferrer" class="video__link">
+      {url}
+    </a>
+  )
+}
+
+<style>
+  .video {
+    position: relative;
+    aspect-ratio: 16 / 9;
+    width: 100%;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    overflow: hidden;
+    background:
+      var(--poster, none) center / cover no-repeat,
+      var(--bg-elevated);
+  }
+  .video::after {
+    /* koyu okunur katman */
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+      to top,
+      color-mix(in srgb, var(--bg) 60%, transparent),
+      color-mix(in srgb, var(--bg) 15%, transparent)
+    );
+    pointer-events: none;
+  }
+  .video :global(iframe) {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    border: 0;
+  }
+
+  .video__btn {
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    display: grid;
+    place-items: center;
+    width: 100%;
+    height: 100%;
+    background: none;
+    border: 0;
+    cursor: pointer;
+  }
+  .video__play {
+    display: grid;
+    place-items: center;
+    width: 4rem;
+    height: 4rem;
+    padding-left: 4px;
+    border-radius: 50%;
+    color: var(--text);
+    background: color-mix(in srgb, var(--bg) 55%, transparent);
+    border: 1px solid var(--border-strong);
+    transition: background var(--transition), border-color var(--transition), color var(--transition);
+  }
+  .video__btn:hover .video__play,
+  .video__btn:focus-visible .video__play {
+    color: var(--accent);
+    border-color: var(--accent);
+    background: color-mix(in srgb, var(--accent-deep) 65%, transparent);
+  }
+
+  .video__link {
+    display: inline-block;
+    font-family: var(--font-mono);
+    font-size: var(--text--1);
+    color: var(--link);
+    word-break: break-all;
+  }
+</style>
+
+<script>
+  for (const el of document.querySelectorAll<HTMLElement>('[data-video]')) {
+    const btn = el.querySelector<HTMLButtonElement>('[data-video-play]');
+    btn?.addEventListener(
+      'click',
+      () => {
+        const src = el.dataset.embed;
+        if (!src) return;
+        const iframe = document.createElement('iframe');
+        iframe.src = src;
+        iframe.title = el.dataset.title || 'Video';
+        iframe.loading = 'lazy';
+        iframe.allow =
+          'autoplay; fullscreen; encrypted-media; picture-in-picture; clipboard-write';
+        iframe.setAttribute('allowfullscreen', '');
+        el.replaceChildren(iframe);
+      },
+      { once: true },
+    );
+  }
+</script>
