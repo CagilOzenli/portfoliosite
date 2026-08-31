@@ -39,6 +39,7 @@ export interface Hero {
   role: string;
   tagline: string;
   ctaLabel: string;
+  backgroundImage?: SanityImage;
 }
 
 export interface NavItem {

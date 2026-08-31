@@ -25,7 +25,8 @@ export const HERO_QUERY = /* groq */ `
   "name": coalesce(name, "ÇAĞIL ÖZENLİ"),
   "role": coalesce(role, "GAME DEVELOPER"),
   "tagline": coalesce(tagline, "I build gameplay systems and playable experiences."),
-  "ctaLabel": coalesce(ctaLabel, "View Work")
+  "ctaLabel": coalesce(ctaLabel, "View Work"),
+  backgroundImage
 }`;
 
 export const NAVIGATION_QUERY = /* groq */ `

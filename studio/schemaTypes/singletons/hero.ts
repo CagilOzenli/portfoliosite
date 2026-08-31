@@ -35,6 +35,17 @@ export default defineType({
       initialValue: 'View Work',
       validation: (Rule) => Rule.required().max(24),
     }),
+    defineField({
+      name: 'backgroundImage',
+      title: 'Background image',
+      type: 'image',
+      description:
+        'Hero arkaplanını tam kaplar (üstüne metin için koyu katman konur). ' +
+        'Boş bırakılırsa greybox test sahnesi çizimi görünür. ' +
+        'Koyu / endüstriyel tonlar iyi durur; parlak veya neon görsellerden kaçın.',
+      options: { hotspot: true },
+      fields: [defineField({ name: 'alt', title: 'Alt text', type: 'string' })],
+    }),
   ],
   preview: { prepare: () => ({ title: 'Hero' }) },
 });
