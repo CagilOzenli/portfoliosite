@@ -1,0 +1,64 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import SectionHeading from '../../components/SectionHeading.astro';
+import ProjectCard from '../../components/ProjectCard.astro';
+import EmptyState from '../../components/EmptyState.astro';
+import { getAllProjects, FEATURED_PLACEHOLDERS } from '../../lib/content';
+
+const projects = await getAllProjects();
+---
+
+<BaseLayout
+  title="Work"
+  description="Game projects and prototypes by Çağıl Özenli — gameplay systems and playable experiences."
+>
+  <div class="container">
+    <div class="page-head">
+      <SectionHeading kicker="Work" title="Projects & prototypes" as="h1">
+        <p>Game projects I've built or contributed to, with short case studies on what I worked on.</p>
+      </SectionHeading>
+    </div>
+
+    {
+      projects.length > 0 ? (
+        <div class="work-grid">
+          {projects.map((p) => (
+            <ProjectCard project={p} />
+          ))}
+        </div>
+      ) : (
+        <div class="work-empty">
+          <div class="work-grid work-grid--ghost" aria-hidden="true">
+            {FEATURED_PLACEHOLDERS.map((ph) => (
+              <ProjectCard placeholderLabel={ph.label} />
+            ))}
+          </div>
+          <EmptyState
+            title="No published projects yet"
+            note="Projects added in the CMS (Work → Projects) with “Published” on will show up here."
+          />
+        </div>
+      )
+    }
+  </div>
+</BaseLayout>
+
+<style>
+  .work-grid {
+    display: grid;
+    gap: var(--space-m);
+  }
+  .work-empty {
+    display: grid;
+    gap: var(--space-l);
+  }
+  .work-grid--ghost {
+    opacity: 0.5;
+  }
+  @media (min-width: 40rem) {
+    .work-grid {
+      grid-template-columns: repeat(2, 1fr);
+      gap: var(--space-l);
+    }
+  }
+</style>

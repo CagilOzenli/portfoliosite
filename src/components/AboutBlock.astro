@@ -1,0 +1,136 @@
+---
+/**
+ * About bloğu. `compact` -> ana sayfadaki kısa önizleme (bio + foto + buton).
+ * Tam sürüm -> /about sayfası (focus, skills, tools, languages, location, availability).
+ */
+import Avatar from './Avatar.astro';
+import Prose from './Prose.astro';
+import Button from './Button.astro';
+import SectionHeading from './SectionHeading.astro';
+import EmptyState from './EmptyState.astro';
+import { getAbout } from '../lib/content';
+
+interface Props {
+  compact?: boolean;
+  as?: 'h1' | 'h2';
+  id?: string;
+}
+const { compact = false, as = 'h2', id = 'about' } = Astro.props;
+
+const about = await getAbout();
+const hasBio = Boolean(about?.bio?.trim());
+
+const facts: { label: string; value: string | string[] }[] = [];
+if (about?.currentFocus) facts.push({ label: 'Current focus', value: about.currentFocus });
+if (about?.skills?.length) facts.push({ label: 'Skills', value: about.skills });
+if (about?.tools?.length) facts.push({ label: 'Tools', value: about.tools });
+if (about?.languages?.length) facts.push({ label: 'Languages', value: about.languages });
+if (about?.location) facts.push({ label: 'Location', value: about.location });
+if (about?.availability) facts.push({ label: 'Availability', value: about.availability });
+---
+
+<section class="about" aria-labelledby={`${id}-title`}>
+  <div class="container">
+    <SectionHeading kicker="About" title="Who I am" as={as} id={`${id}-title`} />
+
+    <div class="about__top">
+      <Avatar photo={about?.photo} size={compact ? 96 : 148} />
+      <div class="about__bio">
+        {
+          hasBio ? (
+            <Prose text={about!.bio} />
+          ) : (
+            <EmptyState
+              title="Bio coming soon"
+              note="Write a short, honest bio in the CMS (About → bio)."
+            />
+          )
+        }
+        {compact && <Button href="/about" icon="arrow" variant="ghost">More about me</Button>}
+        {!compact && <Button href="/contact" icon="arrow">Contact</Button>}
+      </div>
+    </div>
+
+    {
+      !compact && facts.length > 0 && (
+        <dl class="about__facts">
+          {facts.map((f) => (
+            <div class="about__fact">
+              <dt>{f.label}</dt>
+              <dd>
+                {Array.isArray(f.value) ? (
+                  <ul class="about__tags">
+                    {f.value.map((v) => (
+                      <li>{v}</li>
+                    ))}
+                  </ul>
+                ) : (
+                  f.value
+                )}
+              </dd>
+            </div>
+          ))}
+        </dl>
+      )
+    }
+  </div>
+</section>
+
+<style>
+  .about__top {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-m);
+  }
+  .about__bio {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-m);
+    align-items: flex-start;
+  }
+
+  .about__facts {
+    margin-top: var(--space-xl);
+    display: grid;
+    gap: var(--space-m);
+  }
+  .about__fact dt {
+    font-family: var(--font-mono);
+    font-size: var(--text--1);
+    letter-spacing: var(--tracking-caps);
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: var(--space-3xs);
+  }
+  .about__fact dd {
+    color: var(--text-muted);
+  }
+  .about__tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2xs);
+  }
+  .about__tags li {
+    border: 1px solid var(--border);
+    border-radius: var(--radius-pill);
+    padding: 0.2rem 0.7rem;
+    font-size: var(--text--1);
+    font-family: var(--font-mono);
+    color: var(--text-muted);
+  }
+
+  @media (min-width: 46rem) {
+    .about__top {
+      flex-direction: row;
+      align-items: flex-start;
+      gap: var(--space-xl);
+    }
+    .about__bio {
+      flex: 1;
+    }
+    .about__facts {
+      grid-template-columns: repeat(2, 1fr);
+      gap: var(--space-l) var(--space-xl);
+    }
+  }
+</style>

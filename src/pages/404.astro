@@ -1,0 +1,35 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Button from '../components/Button.astro';
+---
+
+<BaseLayout title="Page not found" description="This page doesn't exist." noindex>
+  <div class="nf container container--narrow">
+    <span class="kicker">Error 404</span>
+    <h1>No collision here</h1>
+    <p>That page doesn't exist — or it hasn't been published yet.</p>
+    <div class="nf__actions">
+      <Button href="/" icon="arrow">Back to home</Button>
+      <Button href="/work" icon="arrow" variant="ghost">View work</Button>
+    </div>
+  </div>
+</BaseLayout>
+
+<style>
+  .nf {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-m);
+    align-items: flex-start;
+    padding-bottom: var(--space-2xl);
+  }
+  .nf p {
+    color: var(--text-muted);
+  }
+  .nf__actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-s);
+    margin-top: var(--space-s);
+  }
+</style>

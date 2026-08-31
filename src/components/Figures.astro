@@ -1,0 +1,57 @@
+---
+/**
+ * Sanity görsel dizisini (screenshots / gifs / blueprintScreenshots) ızgara olarak basar.
+ */
+import { thumbUrl, imageAlt } from '../lib/image';
+import type { SanityImage } from '../lib/types';
+
+interface Props {
+  images?: SanityImage[];
+  label?: string;
+}
+const { images, label } = Astro.props;
+const list = (images ?? []).filter((img) => img?.asset);
+---
+
+{
+  list.length > 0 && (
+    <figure class="figures">
+      {label && <figcaption class="figures__label kicker">{label}</figcaption>}
+      <div class="figures__grid">
+        {list.map((img) => (
+          <img
+            src={thumbUrl(img, 1400, 0) ?? ''}
+            alt={imageAlt(img, label ?? 'Screenshot')}
+            loading="lazy"
+            decoding="async"
+          />
+        ))}
+      </div>
+    </figure>
+  )
+}
+
+<style>
+  .figures {
+    margin: 0;
+  }
+  .figures__label {
+    display: block;
+    margin-bottom: var(--space-s);
+  }
+  .figures__grid {
+    display: grid;
+    gap: var(--space-s);
+  }
+  .figures__grid img {
+    width: 100%;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    background: var(--bg-elevated);
+  }
+  @media (min-width: 44rem) {
+    .figures__grid {
+      grid-template-columns: repeat(2, 1fr);
+    }
+  }
+</style>

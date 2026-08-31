@@ -1,0 +1,225 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import Prose from '../../components/Prose.astro';
+import Figures from '../../components/Figures.astro';
+import Icon from '../../components/Icon.astro';
+import { getProjectSlugs, getProjectBySlug } from '../../lib/content';
+import { thumbUrl, imageAlt } from '../../lib/image';
+import { STATUS_LABEL } from '../../lib/types';
+
+export async function getStaticPaths() {
+  const slugs = await getProjectSlugs();
+  return slugs.map((slug) => ({ params: { slug } }));
+}
+
+const { slug } = Astro.params;
+const project = await getProjectBySlug(slug!);
+
+// getStaticPaths yalnızca yayınlanmış slug'ları ürettiği için bu asla
+// gerçekleşmez; sadece TypeScript'i mutlu etmek için guard.
+if (!project) {
+  throw new Error(`Project not found for slug: ${slug}`);
+}
+
+const label =
+  project.genre?.toUpperCase() ||
+  (project.status ? STATUS_LABEL[project.status] : 'GAME PROJECT');
+
+const cover = thumbUrl(project.coverImage, 1600, 900);
+
+const meta: { label: string; value: string }[] = [];
+if (project.engine) meta.push({ label: 'Engine', value: project.engine });
+if (project.role) meta.push({ label: 'Role', value: project.role });
+if (project.genre) meta.push({ label: 'Genre', value: project.genre });
+if (project.status) meta.push({ label: 'Status', value: STATUS_LABEL[project.status] });
+if (project.devTools?.length) meta.push({ label: 'Tools', value: project.devTools.join(', ') });
+
+const links: { label: string; href: string }[] = [];
+if (project.repoLink) links.push({ label: 'Repository', href: project.repoLink });
+if (project.buildLink) links.push({ label: 'Play build', href: project.buildLink });
+if (project.externalLink) links.push({ label: 'More', href: project.externalLink });
+
+const sections: { title: string; text?: string }[] = [
+  { title: 'Overview', text: project.fullDescription },
+  { title: 'Responsibilities', text: project.responsibilities },
+  { title: 'Systems implemented', text: project.systemsImplemented },
+  { title: 'Technical challenges', text: project.technicalChallenges },
+  { title: 'Solutions', text: project.solutions },
+  { title: 'Lessons learned', text: project.lessonsLearned },
+].filter((s) => s.text?.trim());
+
+const videos = (project.videos ?? []).filter(Boolean);
+---
+
+<BaseLayout
+  title={project.seo?.metaTitle || project.name}
+  description={
+    project.seo?.metaDescription ||
+    project.shortDescription ||
+    `${project.name} — case study by Çağıl Özenli.`
+  }
+  image={thumbUrl(project.seo?.ogImage ?? project.coverImage, 1200, 630) ?? undefined}
+>
+  <article class="cs container container--narrow">
+    <a href="/work" class="cs__back arrow-link">
+      <Icon name="arrow" size={14} class="cs__back-icon" /> Back to work
+    </a>
+
+    <header class="cs__head">
+      <span class="kicker">{label}</span>
+      <h1>{project.name}</h1>
+      {project.shortDescription && <p class="cs__lead">{project.shortDescription}</p>}
+    </header>
+
+    {
+      cover ? (
+        <img
+          class="cs__cover"
+          src={cover}
+          alt={imageAlt(project.coverImage, project.name)}
+          width="1600"
+          height="900"
+          fetchpriority="high"
+        />
+      ) : null
+    }
+
+    {
+      meta.length > 0 && (
+        <dl class="cs__meta">
+          {meta.map((m) => (
+            <div>
+              <dt>{m.label}</dt>
+              <dd>{m.value}</dd>
+            </div>
+          ))}
+        </dl>
+      )
+    }
+
+    {
+      links.length > 0 && (
+        <div class="cs__links">
+          {links.map((l) => (
+            <a href={l.href} target="_blank" rel="noopener noreferrer" class="cs__link">
+              {l.label} <Icon name="external" size={14} />
+            </a>
+          ))}
+        </div>
+      )
+    }
+
+    {
+      sections.length === 0 && (
+        <p class="cs__todo">
+          The written case study for this project is still being added in the CMS.
+        </p>
+      )
+    }
+
+    {
+      sections.map((s) => (
+        <section class="cs__section">
+          <h2>{s.title}</h2>
+          <Prose text={s.text} />
+        </section>
+      ))
+    }
+
+    <Figures images={project.screenshots} label="Screenshots" />
+    <Figures images={project.gifs} label="Clips" />
+
+    {
+      videos.length > 0 && (
+        <section class="cs__section">
+          <h2>Video</h2>
+          <ul class="cs__videos">
+            {videos.map((v) => (
+              <li>
+                <a href={v} target="_blank" rel="noopener noreferrer" class="cs__link">
+                  {v} <Icon name="external" size={14} />
+                </a>
+              </li>
+            ))}
+          </ul>
+        </section>
+      )
+    }
+  </article>
+</BaseLayout>
+
+<style>
+  .cs {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-l);
+  }
+  .cs__back {
+    align-self: flex-start;
+  }
+  .cs__back :global(.cs__back-icon) {
+    transform: rotate(180deg);
+  }
+  .cs__head {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-xs);
+  }
+  .cs__lead {
+    font-size: var(--text-1);
+    color: var(--text-muted);
+    max-width: 46ch;
+  }
+  .cs__cover {
+    width: 100%;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-l);
+  }
+  .cs__meta {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: var(--space-m);
+    padding: var(--space-m) 0;
+    border-block: 1px solid var(--border);
+    margin: 0;
+  }
+  .cs__meta dt {
+    font-family: var(--font-mono);
+    font-size: var(--text--1);
+    letter-spacing: var(--tracking-caps);
+    text-transform: uppercase;
+    color: var(--accent);
+  }
+  .cs__meta dd {
+    margin: var(--space-3xs) 0 0;
+    color: var(--text);
+  }
+  .cs__links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-m);
+  }
+  .cs__link {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    font-family: var(--font-mono);
+    font-size: var(--text--1);
+    color: var(--link);
+  }
+  .cs__section {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-s);
+  }
+  .cs__section h2 {
+    font-size: var(--text-1);
+  }
+  .cs__todo,
+  .cs__videos {
+    color: var(--text-faint);
+    font-family: var(--font-mono);
+    font-size: var(--text--1);
+    word-break: break-all;
+  }
+</style>

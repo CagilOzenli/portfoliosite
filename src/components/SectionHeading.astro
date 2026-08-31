@@ -1,0 +1,50 @@
+---
+/**
+ * Bölüm başlığı: küçük mono "kicker" + büyük başlık + opsiyonel açıklama.
+ */
+interface Props {
+  kicker?: string;
+  title: string;
+  as?: 'h1' | 'h2' | 'h3';
+  id?: string;
+  align?: 'start' | 'center';
+}
+
+const { kicker, title, as: Tag = 'h2', id, align = 'start' } = Astro.props;
+---
+
+<header class:list={['sh', `sh--${align}`]}>
+  {kicker && <span class="kicker">{kicker}</span>}
+  <Tag id={id} class="sh__title">{title}</Tag>
+  {
+    Astro.slots.has('default') && (
+      <div class="sh__lead">
+        <slot />
+      </div>
+    )
+  }
+</header>
+
+<style>
+  .sh {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-xs);
+    margin-bottom: var(--space-l);
+  }
+  .sh--center {
+    align-items: center;
+    text-align: center;
+  }
+  .sh__title {
+    max-width: 20ch;
+  }
+  .sh--center .sh__title {
+    max-width: none;
+  }
+  .sh__lead {
+    margin-top: var(--space-2xs);
+    max-width: 52ch;
+    color: var(--text-muted);
+  }
+</style>

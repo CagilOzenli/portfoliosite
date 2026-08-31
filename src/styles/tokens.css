@@ -1,0 +1,129 @@
+/* =========================================================================
+   TASARIM TOKEN'LARI
+   Tüm renk/ölçü değerleri SADECE burada tanımlanır.
+   Hiçbir component'te ham hex ("#123456") kullanma — daima var(--...) çağır.
+   ========================================================================= */
+
+:root {
+  /* ---------------------------------------------------------------------
+     1) MARKA PALETİ  (ham hex değerleri yalnızca bu blokta yaşar)
+     --------------------------------------------------------------------- */
+  --brand-bg:          #15191B;  /* ana arkaplan */
+  --brand-surface:     #20272A;  /* ikincil yüzey (kart, şerit, menü) */
+  --brand-petrol:      #123F43;  /* koyu petrol (derin vurgu) */
+  --brand-teal:        #176B73;  /* ana marka rengi */
+  --brand-teal-light:  #55B5B2;  /* açık teal (ikincil vurgu) */
+  --brand-offwhite:    #F4F2EC;  /* sıcak off-white — SADECE metin/kontrast */
+  --brand-copper:      #C86B3C;  /* bakır — sadece küçük vurgular */
+
+  /* ---------------------------------------------------------------------
+     2) ANLAMSAL TOKEN'LAR  (component'ler bunları kullanır)
+     Her türetilmiş renk için önce düz bir fallback, sonra color-mix.
+     Eski tarayıcı color-mix'i atlar, fallback'i kullanır.
+     --------------------------------------------------------------------- */
+  --bg:            var(--brand-bg);
+  --bg-elevated:   var(--brand-surface);
+  --bg-sunken:     #10161E;
+  --bg-sunken:     color-mix(in srgb, var(--brand-bg) 82%, #000);
+
+  --text:          var(--brand-offwhite);
+
+  --text-muted:    #9fa09d;
+  --text-muted:    color-mix(in srgb, var(--brand-offwhite) 62%, var(--brand-bg));
+
+  --text-faint:    #6e706f;
+  --text-faint:    color-mix(in srgb, var(--brand-offwhite) 40%, var(--brand-bg));
+
+  --border:        rgba(87, 181, 178, 0.18);
+  --border:        color-mix(in srgb, var(--brand-teal-light) 20%, transparent);
+
+  --border-strong: rgba(87, 181, 178, 0.34);
+  --border-strong: color-mix(in srgb, var(--brand-teal-light) 34%, transparent);
+
+  /* Vurgu / marka */
+  --accent:         var(--brand-teal-light);
+  --accent-strong:  var(--brand-teal);
+  --accent-deep:    var(--brand-petrol);
+
+  /* Bağlantılar ve küçük vurgular — bakır */
+  --link:        var(--brand-copper);
+  --link-hover:  #de8d68;
+  --link-hover:  color-mix(in srgb, var(--brand-copper) 72%, var(--brand-offwhite));
+
+  /* Odak halkası (klavye erişilebilirliği) */
+  --focus-ring: var(--brand-teal-light);
+
+  /* Seçili metin */
+  --selection-bg:   rgba(23, 107, 115, 0.55);
+  --selection-text: var(--brand-offwhite);
+
+  /* ---------------------------------------------------------------------
+     3) TİPOGRAFİ
+     --------------------------------------------------------------------- */
+  --font-sans: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto,
+               Helvetica, Arial, "Apple Color Emoji", "Segoe UI Emoji", sans-serif;
+  --font-mono: ui-monospace, "Cascadia Code", "SF Mono", "Roboto Mono", Menlo,
+               Consolas, "Liberation Mono", monospace;
+
+  /* Akışkan tip ölçeği: (min, tercih, max) — mobil-öncelikli */
+  --text--1:  clamp(0.80rem, 0.77rem + 0.15vw, 0.90rem);
+  --text-0:   clamp(1.00rem, 0.95rem + 0.25vw, 1.13rem);
+  --text-1:   clamp(1.20rem, 1.10rem + 0.50vw, 1.50rem);
+  --text-2:   clamp(1.45rem, 1.28rem + 0.85vw, 2.05rem);
+  --text-3:   clamp(1.90rem, 1.55rem + 1.75vw, 3.05rem);
+  --text-4:   clamp(2.35rem, 1.75rem + 3.00vw, 4.25rem);
+
+  --leading-tight:  1.12;
+  --leading-snug:   1.28;
+  --leading-normal: 1.62;
+
+  --tracking-tight:  -0.015em;
+  --tracking-wide:   0.02em;
+  --tracking-caps:   0.14em;   /* SPACED-OUT ETİKETLER İÇİN */
+
+  --weight-normal: 400;
+  --weight-medium: 500;
+  --weight-bold:   700;
+
+  /* ---------------------------------------------------------------------
+     4) BOŞLUK ÖLÇEĞİ
+     --------------------------------------------------------------------- */
+  --space-3xs: 0.25rem;
+  --space-2xs: 0.375rem;
+  --space-xs:  0.625rem;
+  --space-s:   1rem;
+  --space-m:   1.5rem;
+  --space-l:   2.5rem;
+  --space-xl:  4rem;
+  --space-2xl: 6rem;
+  --space-3xl: 9rem;
+
+  /* Bölümler arası dikey ritim (mobilde küçük, masaüstünde büyük) */
+  --section-gap: clamp(3.5rem, 2.5rem + 5vw, 7rem);
+
+  /* ---------------------------------------------------------------------
+     5) YERLEŞİM
+     --------------------------------------------------------------------- */
+  --container:        68rem;   /* geniş içerik sınırı */
+  --container-narrow: 44rem;   /* okuma genişliği (case study metni) */
+  --gutter:           clamp(1.15rem, 0.8rem + 2.5vw, 2.5rem);
+
+  --radius-s:  3px;
+  --radius:    5px;
+  --radius-l:  9px;
+  --radius-pill: 999px;
+
+  /* ---------------------------------------------------------------------
+     6) KENAR GÖLGELERİ & GEÇİŞLER
+     --------------------------------------------------------------------- */
+  --shadow-card: 0 1px 0 rgba(0, 0, 0, 0.35), 0 12px 28px -18px rgba(0, 0, 0, 0.7);
+  --transition:      160ms ease;
+  --transition-slow: 320ms ease;
+
+  /* Header yüksekliği (sabit; hero'nun üst boşluğu buna göre) */
+  --header-h: 4rem;
+
+  /* Üst katman sıraları */
+  --z-header: 100;
+  --z-nav-overlay: 200;
+}

@@ -1,0 +1,83 @@
+---
+/**
+ * Kart görseli yokken kullanılan sade greybox yer tutucu.
+ * `variant="play"` -> ortada yuvarlak play ikonu (Systems Lab kartları).
+ */
+import Icon from './Icon.astro';
+interface Props {
+  variant?: 'plain' | 'play';
+  label?: string;
+}
+const { variant = 'plain', label } = Astro.props;
+---
+
+<div class:list={['thumb', `thumb--${variant}`]}>
+  <svg class="thumb__bg" viewBox="0 0 320 200" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
+    <rect width="320" height="200" class="thumb__ground" />
+    <path d="M0 150 H320 M0 120 H320 M60 200 V120 M160 200 V120 M250 200 V120" class="thumb__grid" />
+    <rect x="42" y="96" width="60" height="42" class="thumb__box" />
+    <path d="M42 96 L58 84 L118 84 L102 96 Z" class="thumb__box-top" />
+    <rect x="196" y="72" width="52" height="66" class="thumb__box" />
+    <path d="M196 72 L210 60 L262 60 L248 72 Z" class="thumb__box-top" />
+  </svg>
+
+  {label && <span class="thumb__label">{label}</span>}
+
+  {
+    variant === 'play' && (
+      <span class="thumb__play" aria-hidden="true">
+        <Icon name="play" size={22} />
+      </span>
+    )
+  }
+</div>
+
+<style>
+  .thumb {
+    position: relative;
+    aspect-ratio: 16 / 10;
+    background: var(--bg-sunken);
+    overflow: hidden;
+    display: grid;
+    place-items: center;
+  }
+  .thumb__bg {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+  }
+  .thumb__ground { fill: var(--bg-sunken); }
+  .thumb__grid { stroke: var(--accent); stroke-width: 1; opacity: 0.12; fill: none; }
+  .thumb__box { fill: var(--bg-elevated); stroke: var(--border-strong); stroke-width: 1; }
+  .thumb__box-top {
+    fill: color-mix(in srgb, var(--bg-elevated) 72%, var(--text));
+    stroke: var(--border-strong);
+    stroke-width: 1;
+  }
+  .thumb__label {
+    position: absolute;
+    left: 0.7rem;
+    bottom: 0.6rem;
+    font-family: var(--font-mono);
+    font-size: var(--text--1);
+    letter-spacing: 0.14em;
+    color: var(--text-faint);
+  }
+  .thumb__play {
+    position: relative;
+    display: grid;
+    place-items: center;
+    width: 3.4rem;
+    height: 3.4rem;
+    border-radius: 50%;
+    background: color-mix(in srgb, var(--bg) 55%, transparent);
+    border: 1px solid var(--border-strong);
+    color: var(--text);
+    padding-left: 3px;
+  }
+  .thumb--play:hover .thumb__play {
+    border-color: var(--accent);
+    color: var(--accent);
+  }
+</style>

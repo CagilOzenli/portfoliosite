@@ -1,0 +1,13 @@
+# Tüm metin dosyalarını repo'da LF olarak tut (Cloudflare Linux'ta derler).
+* text=auto eol=lf
+
+# İkili dosyalara dokunma
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.webp binary
+*.ico binary
+*.pdf binary
+*.woff binary
+*.woff2 binary

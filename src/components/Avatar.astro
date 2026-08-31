@@ -1,0 +1,64 @@
+---
+/**
+ * Dairesel profil görseli. Sanity'de foto varsa onu, yoksa NÖTR bir
+ * monogram placeholder gösterir (test karakteri ASLA burada kullanılmaz).
+ */
+import { thumbUrl, imageAlt } from '../lib/image';
+import type { SanityImage } from '../lib/types';
+
+interface Props {
+  photo?: SanityImage;
+  size?: number;
+  name?: string;
+}
+const { photo, size = 160, name = 'Çağıl Özenli' } = Astro.props;
+const src = thumbUrl(photo, size * 2, size * 2);
+const initials = name
+  .split(/\s+/)
+  .map((w) => w[0])
+  .slice(0, 2)
+  .join('')
+  .toUpperCase();
+---
+
+<div class="avatar" style={`--size:${size}px`}>
+  {
+    src ? (
+      <img src={src} alt={imageAlt(photo, name)} width={size} height={size} loading="lazy" decoding="async" />
+    ) : (
+      <span class="avatar__ph" role="img" aria-label="Profile photo placeholder">
+        {initials}
+      </span>
+    )
+  }
+</div>
+
+<style>
+  .avatar {
+    width: var(--size);
+    height: var(--size);
+    border-radius: 50%;
+    overflow: hidden;
+    flex: none;
+    border: 1px solid var(--border-strong);
+    background: var(--bg-elevated);
+  }
+  .avatar img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+  .avatar__ph {
+    width: 100%;
+    height: 100%;
+    display: grid;
+    place-items: center;
+    font-family: var(--font-mono);
+    font-size: calc(var(--size) * 0.3);
+    letter-spacing: 0.06em;
+    color: var(--text-faint);
+    background:
+      radial-gradient(80% 80% at 30% 20%, color-mix(in srgb, var(--accent-deep) 40%, transparent), transparent 70%),
+      var(--bg-elevated);
+  }
+</style>

@@ -1,0 +1,71 @@
+---
+/**
+ * LinkedIn / GitHub / Email (+ opsiyonel CV) satırı.
+ * Değerler siteSettings + contact'tan gelir; boş olanlar gizlenir.
+ */
+import Icon from './Icon.astro';
+
+interface Props {
+  linkedin?: string;
+  github?: string;
+  email?: string;
+  cvUrl?: string | null;
+  variant?: 'row' | 'stack';
+  class?: string;
+}
+
+const { linkedin, github, email, cvUrl, variant = 'row', class: className } = Astro.props;
+
+const items = [
+  linkedin && { label: 'LinkedIn', href: linkedin, icon: 'linkedin' as const, external: true },
+  github && { label: 'GitHub', href: github, icon: 'github' as const, external: true },
+  email && { label: 'Email', href: `mailto:${email}`, icon: 'mail' as const, external: false },
+  cvUrl && { label: 'CV', href: cvUrl, icon: 'download' as const, external: true },
+].filter(Boolean) as { label: string; href: string; icon: 'linkedin' | 'github' | 'mail' | 'download'; external: boolean }[];
+---
+
+{
+  items.length > 0 && (
+    <ul class:list={['social', `social--${variant}`, className]}>
+      {items.map((item) => (
+        <li>
+          <a
+            class="social__link"
+            href={item.href}
+            {...(item.external ? { target: '_blank', rel: 'noopener noreferrer' } : {})}
+          >
+            <Icon name={item.icon} size={18} />
+            <span>{item.label}</span>
+          </a>
+        </li>
+      ))}
+    </ul>
+  )
+}
+
+<style>
+  .social {
+    display: flex;
+    gap: var(--space-m);
+    flex-wrap: wrap;
+  }
+  .social--stack {
+    flex-direction: column;
+    gap: var(--space-xs);
+  }
+  .social__link {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: var(--text-muted);
+    font-family: var(--font-mono);
+    font-size: var(--text--1);
+    letter-spacing: var(--tracking-wide);
+  }
+  .social__link:hover {
+    color: var(--link);
+  }
+  .social__link :global(svg) {
+    flex: none;
+  }
+</style>

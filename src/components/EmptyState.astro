@@ -1,0 +1,49 @@
+---
+/**
+ * İçerik henüz yokken gösterilen NÖTR kutu. Uydurma bilgi içermez —
+ * sadece "burası CMS'ten dolacak" mesajı verir.
+ */
+interface Props {
+  title?: string;
+  note?: string;
+}
+const {
+  title = 'Content coming soon',
+  note = 'This section is managed from the CMS and will be filled in shortly.',
+} = Astro.props;
+---
+
+<div class="empty">
+  <span class="empty__mark" aria-hidden="true">/* */</span>
+  <p class="empty__title">{title}</p>
+  <p class="empty__note">{note}</p>
+</div>
+
+<style>
+  .empty {
+    border: 1px dashed var(--border-strong);
+    border-radius: var(--radius-l);
+    background: var(--bg-elevated);
+    padding: var(--space-l);
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2xs);
+  }
+  .empty__mark {
+    font-family: var(--font-mono);
+    color: var(--text-faint);
+    font-size: var(--text--1);
+    letter-spacing: 0.2em;
+  }
+  .empty__title {
+    font-weight: var(--weight-bold);
+    color: var(--text);
+  }
+  .empty__note {
+    color: var(--text-muted);
+    font-size: var(--text--1);
+    max-width: 40ch;
+    margin-inline: auto;
+  }
+</style>

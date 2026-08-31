@@ -1,0 +1,51 @@
+---
+import SocialLinks from './SocialLinks.astro';
+import { getSiteSettings, getContact } from '../lib/content';
+
+const [settings, contact] = await Promise.all([getSiteSettings(), getContact()]);
+const year = new Date().getFullYear();
+
+const linkedin = contact.linkedin || settings.social.linkedin;
+const github = contact.github || settings.social.github;
+const email = contact.email || settings.social.email;
+---
+
+<footer class="ftr">
+  <div class="ftr__inner container">
+    <p class="ftr__name">Çağıl Özenli</p>
+    <SocialLinks
+      linkedin={linkedin}
+      github={github}
+      email={email}
+      cvUrl={settings.cvUrl}
+      variant="row"
+    />
+    <p class="ftr__meta">© {year} · Built with Astro &amp; Sanity</p>
+  </div>
+</footer>
+
+<style>
+  .ftr {
+    margin-top: var(--section-gap);
+    border-top: 1px solid var(--border);
+    background: var(--bg-sunken);
+  }
+  .ftr__inner {
+    padding-block: var(--space-l);
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-m);
+  }
+  .ftr__name {
+    font-family: var(--font-mono);
+    letter-spacing: var(--tracking-caps);
+    text-transform: uppercase;
+    font-size: var(--text--1);
+    color: var(--text);
+  }
+  .ftr__meta {
+    font-size: var(--text--1);
+    color: var(--text-faint);
+    font-family: var(--font-mono);
+  }
+</style>

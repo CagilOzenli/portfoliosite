@@ -1,0 +1,68 @@
+---
+/**
+ * Bağlantı butonu (site statik olduğu için hep <a>).
+ * variant: 'primary' (dolu teal) | 'ghost' (çerçeveli)
+ */
+import Icon from './Icon.astro';
+
+interface Props {
+  href: string;
+  variant?: 'primary' | 'ghost';
+  icon?: 'arrow' | 'download' | 'mail' | 'external';
+  external?: boolean;
+  class?: string;
+}
+
+const { href, variant = 'primary', icon = 'arrow', external = false, class: className } = Astro.props;
+const attrs = external ? { target: '_blank', rel: 'noopener noreferrer' } : {};
+---
+
+<a href={href} class:list={['btn', `btn--${variant}`, className]} {...attrs}>
+  <span><slot /></span>
+  <Icon name={icon} size={18} />
+</a>
+
+<style>
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.6rem;
+    padding: 0.85rem 1.35rem;
+    border-radius: var(--radius);
+    font-family: var(--font-mono);
+    font-size: var(--text--1);
+    letter-spacing: var(--tracking-caps);
+    text-transform: uppercase;
+    transition:
+      background var(--transition),
+      border-color var(--transition),
+      color var(--transition),
+      transform var(--transition);
+  }
+  .btn :global(svg) {
+    transition: transform var(--transition);
+  }
+  .btn:hover :global(svg) {
+    transform: translateX(3px);
+  }
+
+  .btn--primary {
+    background: var(--accent-strong);
+    color: var(--text);
+    border: 1px solid var(--accent-strong);
+  }
+  .btn--primary:hover {
+    background: color-mix(in srgb, var(--accent-strong) 82%, var(--text));
+    color: var(--text);
+  }
+
+  .btn--ghost {
+    background: transparent;
+    color: var(--text);
+    border: 1px solid var(--border-strong);
+  }
+  .btn--ghost:hover {
+    border-color: var(--accent);
+    color: var(--accent);
+  }
+</style>

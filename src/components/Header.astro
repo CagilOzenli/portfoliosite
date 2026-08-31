@@ -1,0 +1,271 @@
+---
+/**
+ * Header: SADECE sağ üstte hamburger. Logo/monogram yok.
+ * Tıklayınca tam ekran nav açılır (her ekran boyutunda).
+ * Nav öğeleri Sanity'deki "navigation" singleton'ından, yoksa DEFAULT_NAV'dan.
+ */
+import Icon from './Icon.astro';
+import { getNavigation, getHero } from '../lib/content';
+
+const [nav, hero] = await Promise.all([getNavigation(), getHero()]);
+const current = (Astro.url.pathname.replace(/\/+$/, '') || '/').toLowerCase();
+
+function isActive(path: string) {
+  const p = path.replace(/\/+$/, '') || '/';
+  if (p === '/') return current === '/';
+  return current === p || current.startsWith(p + '/');
+}
+---
+
+<header class="hdr">
+  <div class="hdr__bar container">
+    <button
+      type="button"
+      class="hdr__toggle"
+      aria-expanded="false"
+      aria-controls="site-nav"
+      data-nav-toggle
+    >
+      <span class="hdr__toggle-text" data-toggle-open>Menu</span>
+      <span class="hdr__toggle-text" data-toggle-close hidden>Close</span>
+      <span class="hdr__toggle-icon" aria-hidden="true">
+        <Icon name="menu" size={24} class="hdr__icon-menu" />
+        <Icon name="close" size={24} class="hdr__icon-close" />
+      </span>
+    </button>
+  </div>
+
+  <nav id="site-nav" class="nav" data-nav aria-hidden="true">
+    <div class="nav__inner container">
+      <a href="/" class="nav__home" data-nav-link>{hero.name}</a>
+      <ul class="nav__list">
+        {
+          nav.map((item, i) => (
+            <li class="nav__item" style={`--i:${i}`}>
+              <a
+                href={item.path}
+                class="nav__link"
+                data-nav-link
+                aria-current={isActive(item.path) ? 'page' : undefined}
+              >
+                <span class="nav__num">{String(i + 1).padStart(2, '0')}</span>
+                <span class="nav__label">{item.label}</span>
+              </a>
+            </li>
+          ))
+        }
+      </ul>
+    </div>
+  </nav>
+</header>
+
+<style>
+  .hdr {
+    position: sticky;
+    top: 0;
+    z-index: var(--z-header);
+  }
+
+  .hdr__bar {
+    height: var(--header-h);
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    /* Hafif okunur zemin — hero'nun üstünde otururken */
+    background: linear-gradient(
+      to bottom,
+      var(--bg) 30%,
+      color-mix(in srgb, var(--bg) 70%, transparent)
+    );
+  }
+
+  .hdr__toggle {
+    position: relative;
+    z-index: calc(var(--z-nav-overlay) + 1);
+    display: inline-flex;
+    align-items: center;
+    gap: 0.6rem;
+    padding: 0.55rem 0.2rem 0.55rem 0.7rem;
+    background: none;
+    border: 0;
+    cursor: pointer;
+    color: var(--text);
+    font-family: var(--font-mono);
+    font-size: var(--text--1);
+    letter-spacing: var(--tracking-caps);
+    text-transform: uppercase;
+  }
+
+  .hdr__toggle-text[hidden] {
+    display: none;
+  }
+
+  .hdr__toggle-icon {
+    position: relative;
+    width: 24px;
+    height: 24px;
+  }
+  .hdr__toggle-icon :global(svg) {
+    position: absolute;
+    inset: 0;
+    transition: opacity var(--transition), transform var(--transition);
+  }
+  .hdr__toggle-icon :global(.hdr__icon-close) {
+    opacity: 0;
+    transform: rotate(-30deg);
+  }
+
+  /* --- Tam ekran nav --- */
+  .nav {
+    position: fixed;
+    inset: 0;
+    z-index: var(--z-nav-overlay);
+    background: var(--bg);
+    background-image:
+      radial-gradient(
+        120% 80% at 100% 0%,
+        color-mix(in srgb, var(--accent-deep) 55%, transparent),
+        transparent 60%
+      );
+    display: flex;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity var(--transition-slow), visibility var(--transition-slow);
+  }
+
+  .nav__inner {
+    margin-top: auto;
+    margin-bottom: auto;
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-l);
+    width: 100%;
+  }
+
+  .nav__home {
+    font-family: var(--font-mono);
+    font-size: var(--text--1);
+    letter-spacing: var(--tracking-caps);
+    text-transform: uppercase;
+    color: var(--text-muted);
+  }
+  .nav__home:hover {
+    color: var(--accent);
+  }
+
+  .nav__list {
+    display: flex;
+    flex-direction: column;
+    gap: clamp(0.4rem, 0.1rem + 1.5vw, 1rem);
+  }
+
+  .nav__link {
+    display: flex;
+    align-items: baseline;
+    gap: var(--space-s);
+    color: var(--text);
+    font-size: var(--text-3);
+    font-weight: var(--weight-bold);
+    letter-spacing: var(--tracking-tight);
+    line-height: 1.1;
+  }
+  .nav__link:hover .nav__label,
+  .nav__link:focus-visible .nav__label {
+    color: var(--link);
+  }
+  .nav__link[aria-current='page'] .nav__label {
+    color: var(--accent);
+  }
+  .nav__link[aria-current='page'] .nav__label::after {
+    content: '';
+    display: inline-block;
+    width: 0.4em;
+    height: 0.4em;
+    margin-left: 0.4em;
+    border-radius: 50%;
+    background: var(--accent);
+    vertical-align: middle;
+  }
+
+  .nav__num {
+    font-family: var(--font-mono);
+    font-size: var(--text--1);
+    font-weight: var(--weight-normal);
+    color: var(--text-faint);
+  }
+
+  .nav__label {
+    transition: color var(--transition);
+  }
+
+  /* --- Açık durum: <html data-nav-open> --- */
+  :global(html[data-nav-open]) {
+    overflow: hidden;
+  }
+  :global(html[data-nav-open]) .nav {
+    opacity: 1;
+    visibility: visible;
+  }
+  :global(html[data-nav-open]) .hdr__icon-menu {
+    opacity: 0;
+    transform: rotate(30deg);
+  }
+  :global(html[data-nav-open]) .hdr__icon-close {
+    opacity: 1;
+    transform: rotate(0);
+  }
+
+  /* Menü öğelerinin sıralı girişi */
+  .nav__item {
+    opacity: 0;
+    transform: translateY(0.6rem);
+  }
+  :global(html[data-nav-open]) .nav__item {
+    animation: nav-item-in 320ms ease forwards;
+    animation-delay: calc(80ms + var(--i) * 45ms);
+  }
+  @keyframes nav-item-in {
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .nav__item {
+      opacity: 1;
+      transform: none;
+    }
+    :global(html[data-nav-open]) .nav__item {
+      animation: none;
+    }
+  }
+</style>
+
+<script>
+  const html = document.documentElement;
+  const toggle = document.querySelector<HTMLButtonElement>('[data-nav-toggle]');
+  const nav = document.querySelector<HTMLElement>('[data-nav]');
+  const openText = document.querySelector<HTMLElement>('[data-toggle-open]');
+  const closeText = document.querySelector<HTMLElement>('[data-toggle-close]');
+  const links = document.querySelectorAll<HTMLAnchorElement>('[data-nav-link]');
+
+  function setOpen(open: boolean) {
+    html.toggleAttribute('data-nav-open', open);
+    toggle?.setAttribute('aria-expanded', String(open));
+    nav?.setAttribute('aria-hidden', String(!open));
+    openText?.toggleAttribute('hidden', open);
+    closeText?.toggleAttribute('hidden', !open);
+  }
+
+  toggle?.addEventListener('click', () => {
+    setOpen(toggle.getAttribute('aria-expanded') !== 'true');
+  });
+
+  // Bir linke tıklayınca menüyü kapat (aynı sayfa içi geçişlerde de temiz kalsın)
+  links.forEach((link) => link.addEventListener('click', () => setOpen(false)));
+
+  // Escape ile kapat
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && html.hasAttribute('data-nav-open')) setOpen(false);
+  });
+</script>

@@ -1,0 +1,102 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Hero from '../components/Hero.astro';
+import SectionHeading from '../components/SectionHeading.astro';
+import ProjectCard from '../components/ProjectCard.astro';
+import SystemsLabCard from '../components/SystemsLabCard.astro';
+import AboutBlock from '../components/AboutBlock.astro';
+import ContactBlock from '../components/ContactBlock.astro';
+import Icon from '../components/Icon.astro';
+import {
+  getFeaturedProjects,
+  getSystemsLabEntries,
+  FEATURED_PLACEHOLDERS,
+  SYSTEMS_LAB_PLACEHOLDERS,
+} from '../lib/content';
+
+const [featured, systems] = await Promise.all([
+  getFeaturedProjects(),
+  getSystemsLabEntries(),
+]);
+
+// En fazla 2 featured kart. Gerçek proje yoksa 2 nötr yer tutucu.
+const featuredCards = featured.length > 0 ? featured.slice(0, 2) : [];
+const systemsPreview = systems.length > 0 ? systems.slice(0, 4) : [];
+---
+
+<BaseLayout padTop={false}>
+  <div class="flow">
+    <Hero />
+
+    <!-- FEATURED PROJECTS -->
+    <section aria-labelledby="featured-title">
+      <div class="container">
+        <SectionHeading kicker="Selected Work" title="Featured projects" id="featured-title" />
+        <div class="grid-2">
+          {
+            featuredCards.length > 0
+              ? featuredCards.map((p) => <ProjectCard project={p} />)
+              : FEATURED_PLACEHOLDERS.map((ph) => <ProjectCard placeholderLabel={ph.label} />)
+          }
+        </div>
+        <a class="arrow-link section-more" href="/work">
+          All work <Icon name="arrow" size={16} />
+        </a>
+      </div>
+    </section>
+
+    <!-- SYSTEMS LAB -->
+    <section aria-labelledby="lab-title">
+      <div class="container">
+        <SectionHeading kicker="Systems Lab" title="Gameplay systems, broken down" id="lab-title">
+          <p>Focused write-ups of individual mechanics — movement, interaction, combat, UI &amp; input.</p>
+        </SectionHeading>
+        <div class="grid-systems">
+          {
+            systemsPreview.length > 0
+              ? systemsPreview.map((e) => <SystemsLabCard entry={e} />)
+              : SYSTEMS_LAB_PLACEHOLDERS.map((ph) => (
+                  <SystemsLabCard placeholderTitle={ph.title} />
+                ))
+          }
+        </div>
+        <a class="arrow-link section-more" href="/systems-lab">
+          Open Systems Lab <Icon name="arrow" size={16} />
+        </a>
+      </div>
+    </section>
+
+    <!-- ABOUT (kısa) -->
+    <AboutBlock compact />
+
+    <!-- CONTACT -->
+    <ContactBlock />
+  </div>
+</BaseLayout>
+
+<style>
+  .grid-2 {
+    display: grid;
+    gap: var(--space-m);
+  }
+  /* Systems Lab: spec gereği mobilde de 2 sütun */
+  .grid-systems {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: var(--space-s);
+  }
+  .section-more {
+    display: inline-flex;
+    margin-top: var(--space-l);
+  }
+
+  @media (min-width: 40rem) {
+    .grid-2 {
+      grid-template-columns: repeat(2, 1fr);
+      gap: var(--space-l);
+    }
+    .grid-systems {
+      gap: var(--space-m);
+    }
+  }
+</style>

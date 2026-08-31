@@ -1,0 +1,289 @@
+---
+/**
+ * HERO GÖRSELİ — kasıtlı olarak bir "yer tutucu".
+ * Bir UE5 greybox test sahnesinin sade temsili: greybox platformlar,
+ * MARKASIZ / özgün bir test mankeni silüeti, collision kapsülü,
+ * debug ışınları, küçük bir animasyon-state timeline'ı, WASD + gamepad.
+ * Tümü SVG + CSS. Gerçek oyun görüntüsü gibi görünmeye ÇALIŞMAZ;
+ * ileride gerçek ekran görüntüsüyle değiştirilecek.
+ */
+
+// Perspektif zemin çizgileri (frontmatter'da üretip SVG'yi kısa tutuyoruz)
+const vp = { x: 402, y: 232 };
+const floorTop = 250;
+const floorBottom = 470;
+
+const verticals = Array.from({ length: 15 }, (_, i) => -260 + i * 100);
+const horizontals = Array.from({ length: 7 }, (_, i) => {
+  const t = (i + 1) / 8;
+  return floorTop + (floorBottom - floorTop) * t * t;
+});
+---
+
+<figure class="greybox">
+  <svg
+    class="greybox__svg"
+    viewBox="0 0 804 480"
+    role="img"
+    aria-labelledby="greybox-title greybox-desc"
+    preserveAspectRatio="xMidYMid meet"
+  >
+    <title id="greybox-title">Greybox test scene placeholder</title>
+    <desc id="greybox-desc">
+      A stylised block-out level: grey platforms, a generic mannequin with a
+      collision capsule, debug rays, an animation state timeline, and WASD /
+      gamepad input hints. Placeholder art, to be replaced with a real capture.
+    </desc>
+
+    <defs>
+      <clipPath id="floor-clip">
+        <rect x="0" y={floorTop} width="804" height={floorBottom - floorTop} />
+      </clipPath>
+      <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0" class="stop-sky-top" />
+        <stop offset="1" class="stop-sky-bottom" />
+      </linearGradient>
+      <linearGradient id="box-top" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0" class="stop-box-top" />
+        <stop offset="1" class="stop-box-side" />
+      </linearGradient>
+    </defs>
+
+    <!-- zemin + gökyüzü -->
+    <rect x="0" y="0" width="804" height="480" fill="url(#sky)" />
+
+    <!-- perspektif grid -->
+    <g class="grid" clip-path="url(#floor-clip)">
+      {verticals.map((x) => <line x1={x} y1={floorBottom} x2={vp.x} y2={vp.y} />)}
+      {horizontals.map((y) => <line x1="0" y1={y} x2="804" y2={y} />)}
+      <line class="grid__horizon" x1="0" y1={floorTop} x2="804" y2={floorTop} />
+    </g>
+
+    <!-- greybox platformlar -->
+    <g class="box">
+      <!-- arka blok -->
+      <path d="M96 250 L96 205 L206 190 L206 235 Z" class="box__side" />
+      <path d="M96 205 L146 178 L256 165 L206 190 Z" fill="url(#box-top)" class="box__topface" />
+      <path d="M206 190 L206 235 L256 220 L256 165 Z" class="box__side2" />
+
+      <!-- yüksek kule (sağ) -->
+      <rect x="612" y="150" width="92" height="150" class="box__side" />
+      <path d="M612 150 L648 128 L740 128 L704 150 Z" fill="url(#box-top)" class="box__topface" />
+      <path d="M704 150 L740 128 L740 278 L704 300 Z" class="box__side2" />
+
+      <!-- karakterin durduğu orta platform -->
+      <rect x="330" y="330" width="150" height="70" class="box__side" />
+      <path d="M330 330 L360 312 L510 312 L480 330 Z" fill="url(#box-top)" class="box__topface" />
+      <path d="M480 330 L510 312 L510 382 L480 400 Z" class="box__side2" />
+
+      <!-- ön alçak basamak -->
+      <rect x="150" y="392" width="120" height="42" class="box__side" />
+      <path d="M150 392 L172 378 L292 378 L270 392 Z" fill="url(#box-top)" class="box__topface" />
+    </g>
+
+    <!-- debug ışınları -->
+    <g class="debug">
+      <!-- zemin kontrol ışını -->
+      <line x1="405" y1="316" x2="405" y2="338" class="debug__ray-down" />
+      <circle cx="405" cy="338" r="3" class="debug__hit" />
+      <!-- hız vektörü -->
+      <line x1="405" y1="270" x2="452" y2="258" class="debug__vel" />
+      <path d="M452 258 l-9 -1 m9 1 l-6 6" class="debug__vel" />
+      <text x="456" y="252" class="debug__label">velocity</text>
+    </g>
+
+    <!-- collision kapsülü + generic manken -->
+    <g class="mannequin" transform="translate(378 250)">
+      <!-- collision capsule -->
+      <rect x="2" y="-2" width="52" height="92" rx="26" class="capsule" />
+      <text x="58" y="6" class="capsule__label">CAPSULE</text>
+
+      <!-- markasız blok manken -->
+      <g class="figure">
+        <circle cx="28" cy="14" r="10" />
+        <rect x="18" y="24" width="20" height="30" rx="5" />
+        <rect x="6" y="27" width="9" height="26" rx="4.5" />
+        <rect x="41" y="27" width="9" height="26" rx="4.5" />
+        <rect x="19" y="55" width="8.5" height="30" rx="4" />
+        <rect x="28.5" y="55" width="8.5" height="30" rx="4" />
+      </g>
+    </g>
+
+    <!-- animasyon state timeline -->
+    <g class="timeline" transform="translate(40 300)">
+      <rect x="0" y="0" width="250" height="128" rx="8" class="panel" />
+      <text x="14" y="22" class="panel__title">ANIM STATE</text>
+
+      {['Idle', 'Run', 'Jump', 'Land'].map((row, i) => (
+        <g transform={`translate(0 ${38 + i * 21})`}>
+          <text x="14" y="4" class="row__label">{row}</text>
+          <rect x="86" y="-6" width="150" height="10" rx="3" class="row__track" />
+          {row === 'Run' && <rect x="86" y="-6" width="96" height="10" rx="3" class="row__fill" />}
+        </g>
+      ))}
+
+      <!-- playhead -->
+      <line x1="182" y1="30" x2="182" y2="118" class="playhead" />
+      <path d="M182 30 l-5 -6 h10 Z" class="playhead__grip" />
+    </g>
+
+    <!-- WASD -->
+    <g class="keys" transform="translate(556 372)">
+      <g class="key key--active">
+        <rect x="34" y="0" width="30" height="30" rx="6" />
+        <text x="49" y="20">W</text>
+      </g>
+      <g class="key"><rect x="0" y="34" width="30" height="30" rx="6" /><text x="15" y="54">A</text></g>
+      <g class="key"><rect x="34" y="34" width="30" height="30" rx="6" /><text x="49" y="54">S</text></g>
+      <g class="key"><rect x="68" y="34" width="30" height="30" rx="6" /><text x="83" y="54">D</text></g>
+    </g>
+
+    <!-- gamepad -->
+    <g class="pad" transform="translate(672 388)">
+      <path
+        d="M14 6 h20 c10 0 12 1 15 6 l7 22 c2 8 -3 12 -10 12 -4 0 -6 -1 -9 -5 l-4 -5 c-2 -3 -4 -4 -7 -4 h-6 c-3 0 -5 1 -7 4 l-4 5 c-3 4 -5 5 -9 5 -7 0 -12 -4 -10 -12 l7 -22 c3 -5 5 -6 15 -6 z"
+        class="pad__body"
+      />
+      <line x1="12" y1="20" x2="20" y2="20" class="pad__line" />
+      <line x1="16" y1="16" x2="16" y2="24" class="pad__line" />
+      <circle cx="40" cy="17" r="2.2" class="pad__btn" />
+      <circle cx="45" cy="23" r="2.2" class="pad__btn" />
+    </g>
+
+    <!-- yer tutucu etiketi -->
+    <text x="20" y="30" class="stamp">GREYBOX // PLACEHOLDER</text>
+    <text x="20" y="46" class="stamp stamp--dim">test scene · not final art</text>
+  </svg>
+
+  <figcaption class="greybox__caption">
+    Placeholder greybox — will be swapped for a real engine capture.
+  </figcaption>
+</figure>
+
+<style>
+  .greybox {
+    margin: 0;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-l);
+    background: var(--bg-sunken);
+    overflow: hidden;
+  }
+  .greybox__svg {
+    display: block;
+    width: 100%;
+    height: auto;
+  }
+  .greybox__caption {
+    padding: 0.6rem 0.9rem;
+    border-top: 1px solid var(--border);
+    font-family: var(--font-mono);
+    font-size: var(--text--1);
+    letter-spacing: var(--tracking-wide);
+    color: var(--text-faint);
+    background: var(--bg-elevated);
+  }
+
+  /* gradyan stopları */
+  .stop-sky-top { stop-color: var(--bg-sunken); }
+  .stop-sky-bottom { stop-color: var(--bg); }
+  .stop-box-top { stop-color: color-mix(in srgb, var(--bg-elevated) 70%, var(--text)); }
+  .stop-box-side { stop-color: var(--bg-elevated); }
+
+  .grid line {
+    stroke: var(--accent);
+    stroke-width: 1;
+    opacity: 0.14;
+  }
+  .grid .grid__horizon {
+    opacity: 0.28;
+  }
+
+  .box__side { fill: var(--bg-elevated); stroke: var(--border-strong); stroke-width: 1; }
+  .box__side2 { fill: color-mix(in srgb, var(--bg-elevated) 82%, #000); stroke: var(--border-strong); stroke-width: 1; }
+  .box__topface { stroke: var(--border-strong); stroke-width: 1; }
+
+  .capsule {
+    fill: color-mix(in srgb, var(--accent) 8%, transparent);
+    stroke: var(--accent);
+    stroke-width: 1.4;
+    stroke-dasharray: 5 4;
+  }
+  .capsule__label,
+  .debug__label {
+    fill: var(--accent);
+    font-family: var(--font-mono);
+    font-size: 9px;
+    letter-spacing: 0.12em;
+  }
+
+  .figure > * {
+    fill: color-mix(in srgb, var(--text) 26%, var(--bg));
+    stroke: color-mix(in srgb, var(--text) 42%, var(--bg));
+    stroke-width: 1;
+  }
+
+  .debug__ray-down { stroke: var(--link); stroke-width: 1.4; stroke-dasharray: 3 3; }
+  .debug__hit { fill: var(--link); }
+  .debug__vel { stroke: var(--accent); stroke-width: 1.6; fill: none; stroke-linecap: round; }
+
+  .panel {
+    fill: var(--bg-elevated);
+    stroke: var(--border);
+    stroke-width: 1;
+  }
+  .panel__title {
+    fill: var(--text-muted);
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: 0.16em;
+  }
+  .row__label {
+    fill: var(--text-muted);
+    font-family: var(--font-mono);
+    font-size: 10px;
+  }
+  .row__track { fill: color-mix(in srgb, var(--text) 10%, var(--bg)); }
+  .row__fill { fill: var(--accent-strong); }
+  .playhead { stroke: var(--link); stroke-width: 1.4; }
+  .playhead__grip { fill: var(--link); }
+
+  .key rect {
+    fill: var(--bg-elevated);
+    stroke: var(--border-strong);
+    stroke-width: 1;
+  }
+  .key text {
+    fill: var(--text-muted);
+    font-family: var(--font-mono);
+    font-size: 12px;
+    text-anchor: middle;
+  }
+  .key--active rect {
+    fill: var(--accent-deep);
+    stroke: var(--accent);
+  }
+  .key--active text {
+    fill: var(--text);
+  }
+
+  .pad__body { fill: none; stroke: var(--text-muted); stroke-width: 1.4; }
+  .pad__line { stroke: var(--text-muted); stroke-width: 1.4; stroke-linecap: round; }
+  .pad__btn { fill: var(--text-muted); }
+
+  .stamp {
+    fill: var(--text-faint);
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: 0.18em;
+  }
+  .stamp--dim { fill: color-mix(in srgb, var(--text-faint) 70%, var(--bg)); font-size: 9px; letter-spacing: 0.1em; }
+
+  /* Hafif "canlılık": playhead ve aktif tuş nabzı (reduced-motion'da durur) */
+  @media (prefers-reduced-motion: no-preference) {
+    .playhead { animation: ph 3.2s ease-in-out infinite alternate; }
+    @keyframes ph {
+      from { transform: translateX(-70px); }
+      to { transform: translateX(24px); }
+    }
+  }
+</style>

@@ -1,0 +1,62 @@
+---
+/**
+ * Tüm sayfaların ortak iskeleti.
+ * Stil yükleme sırası: tokens (değişkenler) -> global (temel) -> component'ler.
+ */
+import '../styles/tokens.css';
+import '../styles/global.css';
+
+import BaseHead from '../components/BaseHead.astro';
+import Header from '../components/Header.astro';
+import Footer from '../components/Footer.astro';
+import { getSiteSettings } from '../lib/content';
+import { thumbUrl } from '../lib/image';
+
+interface Props {
+  title?: string;
+  description?: string;
+  image?: string;
+  noindex?: boolean;
+  /** Header'ı gizle (ör. hero'nun kendi üst alanını yönettiği durumlar) */
+  padTop?: boolean;
+}
+
+const settings = await getSiteSettings();
+
+const {
+  title,
+  description = settings.siteDescription,
+  image,
+  noindex = false,
+  padTop = true,
+} = Astro.props;
+
+const fullTitle = title ? `${title} · ${settings.siteTitle}` : `${settings.siteTitle} · Game Developer`;
+const ogImage = image ?? thumbUrl(settings.ogImage, 1200, 630) ?? undefined;
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <BaseHead
+      title={fullTitle}
+      description={description}
+      image={ogImage}
+      noindex={noindex}
+    />
+  </head>
+  <body>
+    <a href="#main" class="skip-link">İçeriğe geç</a>
+    <Header />
+    <main id="main" class:list={['main', { 'main--pad': padTop }]}>
+      <slot />
+    </main>
+    <Footer />
+
+    <style>
+      .main--pad {
+        padding-top: var(--section-gap);
+      }
+    </style>
+  </body>
+</html>

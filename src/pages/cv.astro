@@ -1,0 +1,47 @@
+---
+/**
+ * /cv -> Sanity'ye yüklenen CV dosyasına yönlendirir.
+ * Site statik olduğu için sunucu tarafı redirect yok; bunun yerine
+ * build sırasında CV URL'i alınır ve <meta refresh> ile anında yönlendiren
+ * küçük bir sayfa üretilir. CV yoksa nazik bir bilgi sayfası gösterilir.
+ */
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Button from '../components/Button.astro';
+import { getSiteSettings } from '../lib/content';
+
+const settings = await getSiteSettings();
+const cvUrl = settings.cvUrl;
+---
+
+{
+  cvUrl ? (
+    <html lang="en">
+      <head>
+        <meta charset="utf-8" />
+        <meta http-equiv="refresh" content={`0; url=${cvUrl}`} />
+        <meta name="robots" content="noindex" />
+        <title>Downloading CV…</title>
+        <link rel="canonical" href={cvUrl} />
+      </head>
+      <body style="font-family: system-ui, sans-serif; background:#15191B; color:#F4F2EC; padding:2rem;">
+        <p>
+          Your download should start automatically. If not,
+          <a href={cvUrl} style="color:#C86B3C;">click here to open the CV</a>.
+        </p>
+        <script is:inline set:html={`location.replace(${JSON.stringify(cvUrl)});`} />
+      </body>
+    </html>
+  ) : (
+    <BaseLayout title="CV" description="Curriculum vitae — Çağıl Özenli." noindex>
+      <div class="container container--narrow">
+        <span class="kicker">CV</span>
+        <h1>CV not uploaded yet</h1>
+        <p style="color:var(--text-muted); margin:1rem 0 2rem; max-width:46ch;">
+          The CV file is managed from the CMS (Site Settings → CV file). Once it's
+          uploaded, this page will link straight to it.
+        </p>
+        <Button href="/contact" icon="arrow">Contact me instead</Button>
+      </div>
+    </BaseLayout>
+  )
+}

@@ -1,0 +1,140 @@
+---
+/**
+ * Proje kartı: üstte büyük thumbnail, altta koyu şerit + etiket + başlık +
+ * bakır "Case Study →" linki.
+ * `project` verilmezse NÖTR yer tutucu kart (fuar demosunda boş görünmesin diye) —
+ * uydurma başlık/açıklama yok, link pasif.
+ */
+import Icon from './Icon.astro';
+import ThumbPlaceholder from './ThumbPlaceholder.astro';
+import { thumbUrl, imageAlt } from '../lib/image';
+import { STATUS_LABEL, type Project } from '../lib/types';
+
+interface Props {
+  project?: Project;
+  placeholderLabel?: string;
+}
+const { project, placeholderLabel } = Astro.props;
+
+const isPlaceholder = !project;
+const label = project
+  ? project.genre?.toUpperCase() ||
+    (project.status ? STATUS_LABEL[project.status] : 'GAME PROJECT')
+  : placeholderLabel ?? 'GAME PROJECT';
+
+const href = project ? `/work/${project.slug}` : null;
+const cover = project ? thumbUrl(project.coverImage, 1280, 800) : null;
+---
+
+<article class:list={['pcard', { 'pcard--placeholder': isPlaceholder }]}>
+  {
+    href ? (
+      <a class="pcard__media" href={href} aria-label={`${project!.name} — case study`}>
+        {cover ? (
+          <img src={cover} alt={imageAlt(project!.coverImage, project!.name)} loading="lazy" decoding="async" width="1280" height="800" />
+        ) : (
+          <ThumbPlaceholder label="no cover yet" />
+        )}
+      </a>
+    ) : (
+      <div class="pcard__media pcard__media--static">
+        <ThumbPlaceholder label="placeholder" />
+      </div>
+    )
+  }
+
+  <div class="pcard__strip">
+    <span class="kicker">{label}</span>
+
+    {
+      project ? (
+        <h3 class="pcard__title">
+          <a href={href}>{project.name}</a>
+        </h3>
+      ) : (
+        <p class="pcard__title pcard__title--muted">Project coming soon</p>
+      )
+    }
+
+    {project?.shortDescription && <p class="pcard__desc">{project.shortDescription}</p>}
+
+    {
+      href ? (
+        <a class="arrow-link pcard__cta" href={href}>
+          Case Study <Icon name="arrow" size={16} />
+        </a>
+      ) : (
+        <span class="arrow-link pcard__cta pcard__cta--off">
+          Case Study <Icon name="arrow" size={16} />
+        </span>
+      )
+    }
+  </div>
+</article>
+
+<style>
+  .pcard {
+    display: flex;
+    flex-direction: column;
+    background: var(--bg-elevated);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-l);
+    overflow: hidden;
+    transition: border-color var(--transition), transform var(--transition);
+  }
+  .pcard:not(.pcard--placeholder):hover {
+    border-color: var(--border-strong);
+    transform: translateY(-3px);
+  }
+
+  .pcard__media {
+    display: block;
+    aspect-ratio: 16 / 10;
+    background: var(--bg-sunken);
+    overflow: hidden;
+  }
+  .pcard__media img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform var(--transition-slow);
+  }
+  .pcard:hover .pcard__media img {
+    transform: scale(1.03);
+  }
+
+  .pcard__strip {
+    padding: var(--space-m);
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2xs);
+    border-top: 1px solid var(--border);
+  }
+
+  .pcard__title {
+    font-size: var(--text-1);
+  }
+  .pcard__title a {
+    color: var(--text);
+  }
+  .pcard__title a:hover {
+    color: var(--accent);
+  }
+  .pcard__title--muted {
+    color: var(--text-faint);
+    font-weight: var(--weight-bold);
+  }
+
+  .pcard__desc {
+    color: var(--text-muted);
+    font-size: var(--text--1);
+  }
+
+  .pcard__cta {
+    margin-top: var(--space-2xs);
+  }
+  .pcard__cta--off {
+    color: var(--text-faint);
+    cursor: default;
+  }
+</style>

@@ -1,0 +1,60 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import SectionHeading from '../../components/SectionHeading.astro';
+import SystemsLabCard from '../../components/SystemsLabCard.astro';
+import { getSystemsLabEntries, SYSTEMS_LAB_PLACEHOLDERS } from '../../lib/content';
+
+const entries = await getSystemsLabEntries();
+---
+
+<BaseLayout
+  title="Systems Lab"
+  description="Focused breakdowns of individual gameplay systems — movement, interaction, combat, UI & input."
+>
+  <div class="container">
+    <div class="page-head">
+      <SectionHeading kicker="Systems Lab" title="Gameplay systems, broken down" as="h1">
+        <p>
+          Each entry is one mechanic: what it does, how it's built, the problem it
+          solved. Short and technical.
+        </p>
+      </SectionHeading>
+    </div>
+
+    <div class="lab-grid">
+      {
+        entries.length > 0
+          ? entries.map((e) => <SystemsLabCard entry={e} />)
+          : SYSTEMS_LAB_PLACEHOLDERS.map((ph) => <SystemsLabCard placeholderTitle={ph.title} />)
+      }
+    </div>
+
+    {
+      entries.length === 0 && (
+        <p class="lab-note">
+          These are placeholder categories. Published entries added in the CMS
+          (Systems Lab) will replace them here.
+        </p>
+      )
+    }
+  </div>
+</BaseLayout>
+
+<style>
+  .lab-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: var(--space-s);
+  }
+  .lab-note {
+    margin-top: var(--space-l);
+    color: var(--text-faint);
+    font-family: var(--font-mono);
+    font-size: var(--text--1);
+  }
+  @media (min-width: 48rem) {
+    .lab-grid {
+      gap: var(--space-m);
+    }
+  }
+</style>

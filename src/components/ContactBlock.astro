@@ -1,0 +1,62 @@
+---
+/**
+ * "Let's Talk" bloğu — /contact sayfasında ve ana sayfada kullanılır.
+ */
+import Button from './Button.astro';
+import SocialLinks from './SocialLinks.astro';
+import SectionHeading from './SectionHeading.astro';
+import { getContact, getSiteSettings } from '../lib/content';
+
+interface Props {
+  as?: 'h1' | 'h2';
+  id?: string;
+}
+const { as = 'h2', id = 'contact' } = Astro.props;
+
+const [contact, settings] = await Promise.all([getContact(), getSiteSettings()]);
+const email = contact.email || settings.social.email;
+const linkedin = contact.linkedin || settings.social.linkedin;
+const github = contact.github || settings.social.github;
+---
+
+<section class="contact" aria-labelledby={`${id}-title`}>
+  <div class="container">
+    <SectionHeading kicker="Contact" title={contact.heading} as={as} id={`${id}-title`}>
+      <p>Open to junior game developer roles and internships. The fastest way to reach me is email.</p>
+    </SectionHeading>
+
+    <div class="contact__actions">
+      {
+        email ? (
+          <Button href={`mailto:${email}`} icon="mail">
+            {email}
+          </Button>
+        ) : (
+          <p class="contact__todo">Add an email address in the CMS (Contact Information).</p>
+        )
+      }
+    </div>
+
+    <SocialLinks
+      class="contact__social"
+      linkedin={linkedin}
+      github={github}
+      cvUrl={settings.cvUrl}
+      variant="row"
+    />
+  </div>
+</section>
+
+<style>
+  .contact__actions {
+    margin-bottom: var(--space-l);
+  }
+  .contact__social {
+    margin-top: var(--space-m);
+  }
+  .contact__todo {
+    color: var(--text-faint);
+    font-family: var(--font-mono);
+    font-size: var(--text--1);
+  }
+</style>

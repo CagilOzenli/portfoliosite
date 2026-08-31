@@ -1,0 +1,179 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import Prose from '../../components/Prose.astro';
+import Figures from '../../components/Figures.astro';
+import Icon from '../../components/Icon.astro';
+import { getSystemsLabSlugs, getSystemsLabEntryBySlug } from '../../lib/content';
+
+export async function getStaticPaths() {
+  const slugs = await getSystemsLabSlugs();
+  return slugs.map((slug) => ({ params: { slug } }));
+}
+
+const { slug } = Astro.params;
+const entry = await getSystemsLabEntryBySlug(slug!);
+if (!entry) {
+  throw new Error(`Systems Lab entry not found for slug: ${slug}`);
+}
+
+const meta: { label: string; value: string }[] = [];
+if (entry.engine) meta.push({ label: 'Engine', value: entry.engine });
+if (entry.tools?.length) meta.push({ label: 'Tools', value: entry.tools.join(', ') });
+if (entry.relatedProject) meta.push({ label: 'Project', value: entry.relatedProject.name });
+
+const sections: { title: string; text?: string }[] = [
+  { title: 'How it works', text: entry.fullExplanation },
+  { title: 'My contribution', text: entry.contribution },
+  { title: 'Challenge', text: entry.challenge },
+  { title: 'Solution', text: entry.solution },
+].filter((s) => s.text?.trim());
+---
+
+<BaseLayout
+  title={entry.title}
+  description={entry.summary || `${entry.title} — a gameplay system breakdown by Çağıl Özenli.`}
+>
+  <article class="cs container container--narrow">
+    <a href="/systems-lab" class="cs__back arrow-link">
+      <Icon name="arrow" size={14} class="cs__back-icon" /> Back to Systems Lab
+    </a>
+
+    <header class="cs__head">
+      <span class="kicker">System</span>
+      <h1>{entry.title}</h1>
+      {entry.summary && <p class="cs__lead">{entry.summary}</p>}
+    </header>
+
+    {
+      meta.length > 0 && (
+        <dl class="cs__meta">
+          {meta.map((m) => (
+            <div>
+              <dt>{m.label}</dt>
+              <dd>
+                {m.label === 'Project' && entry.relatedProject ? (
+                  <a href={`/work/${entry.relatedProject.slug}`}>{m.value}</a>
+                ) : (
+                  m.value
+                )}
+              </dd>
+            </div>
+          ))}
+        </dl>
+      )
+    }
+
+    {
+      entry.githubLink && (
+        <div class="cs__links">
+          <a href={entry.githubLink} target="_blank" rel="noopener noreferrer" class="cs__link">
+            Code <Icon name="external" size={14} />
+          </a>
+        </div>
+      )
+    }
+
+    {
+      sections.length === 0 && (
+        <p class="cs__todo">The write-up for this system is still being added in the CMS.</p>
+      )
+    }
+
+    {
+      sections.map((s) => (
+        <section class="cs__section">
+          <h2>{s.title}</h2>
+          <Prose text={s.text} />
+        </section>
+      ))
+    }
+
+    <Figures images={entry.blueprintScreenshots} label="Blueprint / code" />
+
+    {
+      entry.gif?.asset && (
+        <Figures images={[entry.gif]} label="Clip" />
+      )
+    }
+
+    {
+      entry.video && (
+        <section class="cs__section">
+          <h2>Video</h2>
+          <a href={entry.video} target="_blank" rel="noopener noreferrer" class="cs__link">
+            {entry.video} <Icon name="external" size={14} />
+          </a>
+        </section>
+      )
+    }
+  </article>
+</BaseLayout>
+
+<style>
+  .cs {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-l);
+  }
+  .cs__back {
+    align-self: flex-start;
+  }
+  .cs__back :global(.cs__back-icon) {
+    transform: rotate(180deg);
+  }
+  .cs__head {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-xs);
+  }
+  .cs__lead {
+    font-size: var(--text-1);
+    color: var(--text-muted);
+    max-width: 46ch;
+  }
+  .cs__meta {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: var(--space-m);
+    padding: var(--space-m) 0;
+    border-block: 1px solid var(--border);
+    margin: 0;
+  }
+  .cs__meta dt {
+    font-family: var(--font-mono);
+    font-size: var(--text--1);
+    letter-spacing: var(--tracking-caps);
+    text-transform: uppercase;
+    color: var(--accent);
+  }
+  .cs__meta dd {
+    margin: var(--space-3xs) 0 0;
+    color: var(--text);
+  }
+  .cs__links {
+    display: flex;
+    gap: var(--space-m);
+  }
+  .cs__link {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    font-family: var(--font-mono);
+    font-size: var(--text--1);
+    color: var(--link);
+    word-break: break-all;
+  }
+  .cs__section {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-s);
+  }
+  .cs__section h2 {
+    font-size: var(--text-1);
+  }
+  .cs__todo {
+    color: var(--text-faint);
+    font-family: var(--font-mono);
+    font-size: var(--text--1);
+  }
+</style>

@@ -1,0 +1,88 @@
+---
+/**
+ * Systems Lab kartı: thumbnail-öncelikli, üzerinde ortalanmış yuvarlak play ikonu.
+ * `entry` yoksa NÖTR yer tutucu (sadece başlık, açıklama uydurma yok).
+ */
+import ThumbPlaceholder from './ThumbPlaceholder.astro';
+import Icon from './Icon.astro';
+import { type SystemsLabEntry } from '../lib/types';
+
+interface Props {
+  entry?: Pick<SystemsLabEntry, 'title' | 'slug' | 'summary' | 'engine'>;
+  /** entry yokken gösterilecek başlık (sabit kategori adı) */
+  placeholderTitle?: string;
+}
+const { entry, placeholderTitle } = Astro.props;
+
+const title = entry?.title ?? placeholderTitle ?? 'System';
+const href = entry?.slug ? `/systems-lab/${entry.slug}` : null;
+const Tag = href ? 'a' : 'div';
+---
+
+<article class:list={['scard', { 'scard--off': !href }]}>
+  <Tag
+    class="scard__media"
+    {...href ? { href } : {}}
+    {...href ? { 'aria-label': `${title} — open` } : {}}
+  >
+    <ThumbPlaceholder variant="play" />
+  </Tag>
+  <div class="scard__foot">
+    <h3 class="scard__title">
+      {href ? <a href={href}>{title}</a> : <span>{title}</span>}
+    </h3>
+    {entry?.summary && <p class="scard__summary">{entry.summary}</p>}
+    {
+      href && (
+        <span class="arrow-link scard__cta">
+          Open <Icon name="arrow" size={14} />
+        </span>
+      )
+    }
+  </div>
+</article>
+
+<style>
+  .scard {
+    background: var(--bg-elevated);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-l);
+    overflow: hidden;
+    transition: border-color var(--transition), transform var(--transition);
+  }
+  .scard:not(.scard--off):hover {
+    border-color: var(--border-strong);
+    transform: translateY(-3px);
+  }
+  .scard__media {
+    display: block;
+  }
+  .scard__foot {
+    padding: var(--space-s);
+    border-top: 1px solid var(--border);
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-3xs);
+  }
+  .scard__title {
+    font-size: var(--text-0);
+    font-weight: var(--weight-bold);
+    letter-spacing: 0;
+  }
+  .scard__title a {
+    color: var(--text);
+  }
+  .scard__title a:hover {
+    color: var(--accent);
+  }
+  .scard--off .scard__title span {
+    color: var(--text-muted);
+  }
+  .scard__summary {
+    font-size: var(--text--1);
+    color: var(--text-muted);
+  }
+  .scard__cta {
+    font-size: 0.72rem;
+  }
+</style>

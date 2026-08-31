@@ -1,0 +1,93 @@
+---
+/**
+ * Ana sayfanın ilk ekranı.
+ * Sol: isim / rol / tagline / "View Work" / sosyal linkler.
+ * Sağ: greybox yer tutucu sahne.
+ */
+import Button from './Button.astro';
+import SocialLinks from './SocialLinks.astro';
+import GreyboxScene from './GreyboxScene.astro';
+import { getHero, getSiteSettings, getContact } from '../lib/content';
+
+const [hero, settings, contact] = await Promise.all([
+  getHero(),
+  getSiteSettings(),
+  getContact(),
+]);
+
+const linkedin = contact.linkedin || settings.social.linkedin;
+const github = contact.github || settings.social.github;
+const email = contact.email || settings.social.email;
+---
+
+<section class="hero">
+  <div class="hero__inner container">
+    <div class="hero__text">
+      <h1 class="hero__name">{hero.name}</h1>
+      <p class="hero__role">{hero.role}</p>
+      <p class="hero__tagline">{hero.tagline}</p>
+
+      <div class="hero__actions">
+        <Button href="/work" icon="arrow">{hero.ctaLabel}</Button>
+      </div>
+
+      <SocialLinks
+        class="hero__social"
+        linkedin={linkedin}
+        github={github}
+        email={email}
+        variant="row"
+      />
+    </div>
+
+    <div class="hero__visual">
+      <GreyboxScene />
+    </div>
+  </div>
+</section>
+
+<style>
+  /* Header sticky olduğu için layout'ta yer kaplar; ekstra üst boşluğa gerek yok. */
+  .hero {
+    padding-block: var(--space-m) var(--section-gap);
+  }
+  .hero__inner {
+    display: grid;
+    gap: var(--space-xl);
+    align-items: center;
+  }
+
+  .hero__name {
+    font-size: var(--text-4);
+    letter-spacing: var(--tracking-tight);
+    line-height: 1.02;
+  }
+  .hero__role {
+    margin-top: var(--space-xs);
+    font-family: var(--font-mono);
+    font-size: var(--text-1);
+    letter-spacing: var(--tracking-caps);
+    text-transform: uppercase;
+    color: var(--accent);
+  }
+  .hero__tagline {
+    margin-top: var(--space-m);
+    font-size: var(--text-1);
+    color: var(--text-muted);
+    max-width: 32ch;
+    text-wrap: balance;
+  }
+  .hero__actions {
+    margin-top: var(--space-l);
+  }
+  .hero__social {
+    margin-top: var(--space-l);
+  }
+
+  @media (min-width: 62rem) {
+    .hero__inner {
+      grid-template-columns: minmax(0, 0.85fr) minmax(0, 1.15fr);
+      gap: var(--space-2xl);
+    }
+  }
+</style>
