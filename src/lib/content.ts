@@ -34,11 +34,12 @@ async function safeFetch<T>(query: string, params: Record<string, unknown>, fall
 /* ------------------------------------------------------------------ */
 
 export const DEFAULT_NAV: NavItem[] = [
+  // Menü sırası ana sayfanın bölüm sırasıyla aynı: önce About.
+  { label: 'About', path: '/about' },
+  { label: 'Download CV', path: '/cv' },
   { label: 'Work', path: '/work' },
   { label: 'Systems Lab', path: '/systems-lab' },
-  { label: 'About', path: '/about' },
   { label: 'Contact', path: '/contact' },
-  { label: 'Download CV', path: '/cv' },
 ];
 
 export const DEFAULT_HERO: Hero = {
