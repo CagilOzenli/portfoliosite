@@ -20,8 +20,10 @@ export const sanityClient: SanityClient = createClient({
   projectId,
   dataset,
   apiVersion,
-  // CDN: yayınlanmış içeriği hızlı ve önbellekli okur. Taslak GÖRMEZ — istediğimiz de bu.
-  useCdn: true,
+  // useCdn: false -> build sırasında CANLI API'den çeker (önbellekli CDN değil).
+  // Neden: Publish'ten hemen sonra tetiklenen build, CDN'de eski/boş veriyi
+  // yakalamasın. Build seyrek olduğu için CDN'in hız/maliyet avantajına gerek yok.
+  useCdn: false,
   perspective: 'published',
 });
 
