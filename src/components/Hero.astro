@@ -21,8 +21,19 @@ const linkedin = contact.linkedin || settings.social.linkedin;
 const github = contact.github || settings.social.github;
 const email = contact.email || settings.social.email;
 
-const bgUrl = thumbUrl(hero.backgroundImage, 2000, 1300);
+// Sadece genişlik isteniyor (yükseklik verilmiyor) -> Sanity görseli tek bir
+// sabit orana KIRPMIYOR, orijinal oranıyla döndürüyor. Kırpma/kadrajlama
+// işini tarayıcıda object-fit: cover yapıyor, böylece her ekran genişliğine
+// (mobil dar/uzun, masaüstü geniş/kısa) doğru uyum sağlıyor.
+const bgUrl = thumbUrl(hero.backgroundImage, 2400, 0);
 const hasBg = Boolean(bgUrl);
+
+// Studio'da işaretlenen "hotspot" (odak noktası) varsa kırpma o noktayı
+// merkezde tutar; yoksa görselin ortası kullanılır.
+const hotspot = hero.backgroundImage?.hotspot;
+const objectPosition = hotspot
+  ? `${(hotspot.x * 100).toFixed(1)}% ${(hotspot.y * 100).toFixed(1)}%`
+  : '50% 50%';
 ---
 
 <section class:list={['hero', { 'hero--image': hasBg }]}>
@@ -32,6 +43,7 @@ const hasBg = Boolean(bgUrl);
         <img
           src={bgUrl}
           alt={imageAlt(hero.backgroundImage, '')}
+          style={`object-position: ${objectPosition}`}
           fetchpriority="high"
           decoding="async"
         />
@@ -151,7 +163,14 @@ const hasBg = Boolean(bgUrl);
   }
   .hero__bg {
     position: absolute;
-    inset: 0;
+    /* Header sabit (sticky) ve yarı saydam bir zemine sahip; görseli onun
+       ARKASINA kadar (sayfanın en tepesine) uzatıyoruz ki menü çizgisinde
+       görsel aniden kesilmiş gibi durmasın. Header z-index'i daha yüksek
+       olduğu için görsel görsel olarak onun altında kalır. */
+    top: calc(var(--header-h) * -1);
+    right: 0;
+    bottom: 0;
+    left: 0;
     z-index: -1;
     overflow: hidden;
   }
@@ -159,17 +178,22 @@ const hasBg = Boolean(bgUrl);
     width: 100%;
     height: 100%;
     object-fit: cover;
+    /* object-position frontmatter'dan (hotspot varsa ona göre) satır-içi geliyor */
   }
-  /* Metin kontrastı için koyu katman: mobilde alttan, geniş ekranda soldan */
+  /* Koyu katman: ALT KENAR her zaman düz --bg'ye tam erir (bir sonraki
+     bölümle dikişsiz birleşsin diye "keskin kesim" olmaz), üst kısımda
+     görsel görünür kalır. Masaüstünde buna metin tarafını okunur kılan
+     ikinci, yatay bir katman eklenir. */
   .hero__bg::after {
     content: '';
     position: absolute;
     inset: 0;
-    background: linear-gradient(
+    background-image: linear-gradient(
       to top,
-      color-mix(in srgb, var(--bg) 96%, transparent) 8%,
-      color-mix(in srgb, var(--bg) 78%, transparent) 45%,
-      color-mix(in srgb, var(--bg) 45%, transparent) 100%
+      var(--bg) 0%,
+      color-mix(in srgb, var(--bg) 55%, transparent) 32%,
+      color-mix(in srgb, var(--bg) 22%, transparent) 68%,
+      color-mix(in srgb, var(--bg) 35%, transparent) 100%
     );
   }
   .hero--image .hero__tagline {
@@ -185,12 +209,20 @@ const hasBg = Boolean(bgUrl);
       max-width: 40rem;
     }
     .hero--image .hero__bg::after {
-      background: linear-gradient(
-        to right,
-        color-mix(in srgb, var(--bg) 94%, transparent) 12%,
-        color-mix(in srgb, var(--bg) 70%, transparent) 55%,
-        color-mix(in srgb, var(--bg) 30%, transparent) 100%
-      );
+      background-image:
+        linear-gradient(
+          to right,
+          var(--bg) 0%,
+          color-mix(in srgb, var(--bg) 45%, transparent) 42%,
+          transparent 75%
+        ),
+        linear-gradient(
+          to top,
+          var(--bg) 0%,
+          color-mix(in srgb, var(--bg) 45%, transparent) 32%,
+          transparent 68%,
+          color-mix(in srgb, var(--bg) 30%, transparent) 100%
+        );
     }
   }
 
