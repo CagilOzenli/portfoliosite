@@ -28,6 +28,9 @@ const systemsPreview = systems.length > 0 ? systems.slice(0, 4) : [];
   <div class="flow">
     <Hero />
 
+    <!-- ABOUT (kısa) — gerçek içerik olduğu için hero'dan hemen sonra -->
+    <AboutBlock compact />
+
     <!-- FEATURED PROJECTS -->
     <section aria-labelledby="featured-title">
       <div class="container">
@@ -65,9 +68,6 @@ const systemsPreview = systems.length > 0 ? systems.slice(0, 4) : [];
         </a>
       </div>
     </section>
-
-    <!-- ABOUT (kısa) -->
-    <AboutBlock compact />
 
     <!-- CONTACT -->
     <ContactBlock />
