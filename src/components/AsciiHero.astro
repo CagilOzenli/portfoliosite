@@ -1,21 +1,37 @@
 ---
 /**
- * DENEY (Midjourney) — Hero'nun görseli: dönen bir ASCII küre/elipsoid.
- * "Üreten metin hero'nun kendisidir." Canvas yok; tek bir <pre> içine
- * her karede karakter matrisi yazılır. reduced-motion'da tek kare (statik).
+ * DENEY (Midjourney) — Hero görseli: dönen ASCII küre + ince "veri akışı"
+ * dokusu + küçük bir render/debug HUD'u (oyun motoru debug overlay hissi).
+ * "Üreten metin hero'nun kendisidir." reduced-motion'da tek statik kare.
  */
 ---
 
-<pre class="ascii" data-ascii aria-hidden="true"></pre>
+<div class="ascii-wrap" aria-hidden="true">
+  <pre class="ascii" data-ascii></pre>
+  <div class="ascii-hud" data-hud>
+    <span><b>mesh</b> icosphere.128</span>
+    <span><b>verts</b> 2 562</span>
+    <span><b>rot.y</b> <i data-rot>0</i>&deg;</span>
+    <span class="ascii-hud__sep"></span>
+    <span class="ascii-hud__stat"><i></i> generating</span>
+  </div>
+</div>
 
 <style>
+  .ascii-wrap {
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    pointer-events: none;
+    overflow: hidden;
+  }
+
   .ascii {
     position: absolute;
     inset: 0;
     margin: 0;
     display: grid;
     place-items: center;
-    z-index: -1;
     color: var(--text);
     opacity: 0.34;
     font-family: var(--font-mono);
@@ -23,62 +39,136 @@
     line-height: 1.05;
     letter-spacing: 0.08em;
     white-space: pre;
-    overflow: hidden;
-    pointer-events: none;
     -webkit-mask-image: radial-gradient(135% 100% at 55% 42%, #000 62%, transparent 100%);
     mask-image: radial-gradient(135% 100% at 55% 42%, #000 62%, transparent 100%);
   }
+
+  .ascii-hud {
+    position: absolute;
+    left: var(--gutter);
+    bottom: var(--space-l);
+    display: flex;
+    flex-direction: column;
+    gap: 0.15rem;
+    font-family: var(--font-mono);
+    font-size: 0.72rem;
+    color: var(--text-faint);
+    opacity: 0.9;
+  }
+  .ascii-hud b {
+    font-weight: var(--weight-normal);
+    color: var(--accent-amber);
+    display: inline-block;
+    width: 3.2rem;
+  }
+  .ascii-hud i {
+    font-style: normal;
+    color: var(--text-muted);
+  }
+  .ascii-hud__sep {
+    width: 8rem;
+    border-top: 1px solid var(--border);
+    margin: 0.2rem 0;
+  }
+  .ascii-hud__stat i {
+    display: inline-block;
+    width: 0.5rem;
+    height: 0.5rem;
+    border-radius: 50%;
+    background: var(--accent-strong);
+    margin-right: 0.4rem;
+    vertical-align: middle;
+  }
+  @media (prefers-reduced-motion: no-preference) {
+    .ascii-hud__stat i {
+      animation: hud-blink 1.4s steps(1, end) infinite;
+    }
+  }
+  @keyframes hud-blink {
+    50% {
+      opacity: 0.15;
+    }
+  }
+
   @media (min-width: 62rem) {
     .ascii {
-      /* masaüstünde sağ yarıya kaydır — sol taraftaki metinle boğuşmasın */
       justify-items: end;
       padding-right: 4vw;
+    }
+  }
+  @media (max-width: 48rem) {
+    .ascii-hud {
+      display: none;
     }
   }
 </style>
 
 <script>
   const el = document.querySelector<HTMLPreElement>('[data-ascii]');
-  if (el) {
+  const rotOut = document.querySelector<HTMLElement>('[data-rot]');
+  const wrap = document.querySelector<HTMLElement>('.ascii-wrap');
+
+  if (el && wrap) {
     const node: HTMLPreElement = el;
     const mobile = window.matchMedia('(max-width: 48rem)').matches;
     const W = mobile ? 60 : 104;
     const H = mobile ? 40 : 48;
     const RAMP = ' .:-=+*#%@';
+    const NOISE = '.:-=+';
     const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
     let A = 0.4;
     let B = 0.9;
+    // hedef (pointer parallax) — mevcut açıya doğru yumuşak takip
+    let tiltX = 0;
+    let tiltY = 0;
     let last = 0;
+    let frame = 0;
+
+    const hero = node.closest('section');
+    hero?.addEventListener(
+      'pointermove',
+      (e) => {
+        const r = hero.getBoundingClientRect();
+        tiltX = ((e.clientX - r.left) / r.width - 0.5) * 0.9;
+        tiltY = ((e.clientY - r.top) / r.height - 0.5) * 0.6;
+      },
+      { passive: true },
+    );
 
     function render() {
       const out = new Float32Array(W * H).fill(-Infinity);
       const buf = new Array(W * H).fill(' ');
-      const cA = Math.cos(A), sA = Math.sin(A);
-      const cB = Math.cos(B), sB = Math.sin(B);
-      const aspect = 0.5; // karakter en/boy düzeltmesi
+
+      // --- ince "veri akışı" dokusu (boş hücrelere seyrek karakter) ---
+      for (let i = 0; i < W * H; i++) {
+        const col = i % W;
+        const v = Math.sin(col * 12.9898 + Math.floor(i / W) * 78.233 + frame * 0.12) * 43758.5453;
+        if ((v - Math.floor(v)) > 0.976) buf[i] = NOISE[(col + frame) % NOISE.length];
+      }
+
+      const aRot = A + tiltX;
+      const bRot = B + tiltY;
+      const cA = Math.cos(aRot), sA = Math.sin(aRot);
+      const cB = Math.cos(bRot), sB = Math.sin(bRot);
 
       for (let t = 0; t < Math.PI * 2; t += 0.06) {
         for (let p = 0; p < Math.PI; p += 0.03) {
           const sp = Math.sin(p), cp = Math.cos(p);
-          // birim küre noktası
-          let x = sp * Math.cos(t);
-          let y = sp * Math.sin(t);
-          let z = cp;
-          // Y ekseni etrafında (A), sonra X ekseni etrafında (B) döndür
-          let x1 = x * cA + z * sA;
-          let z1 = -x * sA + z * cA;
-          let y1 = y * cB - z1 * sB;
-          let z2 = y * sB + z1 * cB;
+          const x = sp * Math.cos(t);
+          const y = sp * Math.sin(t);
+          const z = cp;
+          const x1 = x * cA + z * sA;
+          const z1 = -x * sA + z * cA;
+          const y1 = y * cB - z1 * sB;
+          const z2 = y * sB + z1 * cB;
 
-          const depth = z2; // -1 .. 1
           const px = Math.round(W / 2 + x1 * (W / 2 - 2));
-          const py = Math.round(H / 2 - y1 * (H / 2 - 1) * aspect * (H / W) * (W / H));
+          const py = Math.round(H / 2 - y1 * (H / 2 - 1) * 0.5);
           if (px < 0 || px >= W || py < 0 || py >= H) continue;
           const idx = py * W + px;
-          if (depth > out[idx]) {
-            out[idx] = depth;
-            // ışık: sağ-üst-ön
+          if (z2 > out[idx]) {
+            out[idx] = z2;
             const lum = (x1 * 0.5 + y1 * 0.6 + z2 * 0.6 + 1.7) / 3.4;
             const ci = Math.max(0, Math.min(RAMP.length - 1, Math.floor(lum * (RAMP.length - 1))));
             buf[idx] = RAMP[ci];
@@ -89,11 +179,14 @@
       let s = '';
       for (let r = 0; r < H; r++) s += buf.slice(r * W, r * W + W).join('') + '\n';
       node.textContent = s;
+
+      if (rotOut) rotOut.textContent = String(Math.round(((A * 180) / Math.PI) % 360));
     }
 
     function loop(ts: number) {
       if (ts - last > 55) {
         last = ts;
+        frame++;
         A += 0.022;
         B += 0.009;
         render();
