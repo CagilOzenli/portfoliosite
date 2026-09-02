@@ -1,129 +1,135 @@
 /* =========================================================================
-   TASARIM TOKEN'LARI
-   Tüm renk/ölçü değerleri SADECE burada tanımlanır.
-   Hiçbir component'te ham hex ("#123456") kullanma — daima var(--...) çağır.
+   TASARIM TOKEN'LARI  —  DENEY: "Midjourney / Deep-ocean bioluminescent terminal"
+   (referans: DESIGN.md)
+   Token İSİMLERİ aynı kaldı; sadece değerler değişti. Component'ler
+   dokunulmadan yeni palete/tipografiye geçer.
+   Ham hex değerleri yalnızca "1) PALET" bloğunda.
    ========================================================================= */
 
 :root {
   /* ---------------------------------------------------------------------
-     1) MARKA PALETİ  (ham hex değerleri yalnızca bu blokta yaşar)
+     1) PALET  (ham hex)
      --------------------------------------------------------------------- */
-  --brand-bg:          #15191B;  /* ana arkaplan */
-  --brand-surface:     #20272A;  /* ikincil yüzey (kart, şerit, menü) */
-  --brand-petrol:      #123F43;  /* koyu petrol (derin vurgu) */
-  --brand-teal:        #176B73;  /* ana marka rengi */
-  --brand-teal-light:  #55B5B2;  /* açık teal (ikincil vurgu) */
-  --brand-offwhite:    #F4F2EC;  /* sıcak off-white — SADECE metin/kontrast */
-  --brand-copper:      #C86B3C;  /* bakır — sadece küçük vurgular */
+  --brand-void:        #06051d;  /* cosmic void — ana arkaplan */
+  --brand-void-top:    #061434;  /* gradyanın üst ucu (biraz daha açık lacivert) */
+  --brand-abyssal:     #0f1c36;  /* abyssal blue — ikincil yüzey */
+  --brand-steel:       #1d293d;  /* steel navy — kart / nav / menü */
+  --brand-slate:       #314062;  /* deep slate — hover / yükseltilmiş yüzey */
+  --brand-mist:        #cad5e2;  /* mist — birincil metin (mavi-gri) */
+  --brand-fog:         #e5e7eb;  /* fog — kenarlıklar / ayraçlar */
+  --brand-ghost:       #ffffff;  /* ghost white — başlıklar (maks kontrast) */
+  --brand-portal:      #63b3ed;  /* portal blue — linkler, tek doygun vurgu */
+  --brand-specimen:    #00bc7d;  /* specimen green — ikon / dekoratif SVG */
+  --brand-amber:       #f0b100;  /* warning amber — bölüm başlığı ikonları */
+  --brand-fault:       #ff2056;  /* fault red — hata / ikon */
 
   /* ---------------------------------------------------------------------
-     2) ANLAMSAL TOKEN'LAR  (component'ler bunları kullanır)
-     Her türetilmiş renk için önce düz bir fallback, sonra color-mix.
-     Eski tarayıcı color-mix'i atlar, fallback'i kullanır.
+     2) ANLAMSAL TOKEN'LAR
      --------------------------------------------------------------------- */
-  --bg:            var(--brand-bg);
-  --bg-elevated:   var(--brand-surface);
-  --bg-sunken:     #10161E;
-  --bg-sunken:     color-mix(in srgb, var(--brand-bg) 82%, #000);
+  --bg:            var(--brand-void);
+  --bg-elevated:   var(--brand-steel);
+  --bg-sunken:     #050416;
 
-  --text:          var(--brand-offwhite);
+  /* Sayfanın atmosferik gradyanı (global.css body'de kullanılır) */
+  --gradient-bg:   linear-gradient(0deg, #06051d 30%, #061434);
 
-  --text-muted:    #9fa09d;
-  --text-muted:    color-mix(in srgb, var(--brand-offwhite) 62%, var(--brand-bg));
+  --text:          var(--brand-mist);
+  --text-strong:   var(--brand-ghost);
 
-  --text-faint:    #6e706f;
-  --text-faint:    color-mix(in srgb, var(--brand-offwhite) 40%, var(--brand-bg));
+  --text-muted:    #8b96a8;
+  --text-muted:    color-mix(in srgb, var(--brand-mist) 62%, var(--brand-void));
 
-  --border:        rgba(87, 181, 178, 0.18);
-  --border:        color-mix(in srgb, var(--brand-teal-light) 20%, transparent);
+  --text-faint:    #5a6376;
+  --text-faint:    color-mix(in srgb, var(--brand-mist) 38%, var(--brand-void));
 
-  --border-strong: rgba(87, 181, 178, 0.34);
-  --border-strong: color-mix(in srgb, var(--brand-teal-light) 34%, transparent);
+  --border:        rgba(229, 231, 235, 0.12);
+  --border-strong: rgba(229, 231, 235, 0.22);
 
-  /* Vurgu / marka */
-  --accent:         var(--brand-teal-light);
-  --accent-strong:  var(--brand-teal);
-  --accent-deep:    var(--brand-petrol);
+  /* Vurgu */
+  --accent:         var(--brand-portal);    /* linkler, öne çıkan durum */
+  --accent-strong:  var(--brand-specimen);  /* birincil buton tenti, ikon */
+  --accent-deep:    var(--brand-abyssal);   /* gradyan / derin vurgu */
+  --accent-amber:   var(--brand-amber);     /* bölüm başlığı etiketi */
 
-  /* Bağlantılar ve küçük vurgular — bakır */
-  --link:        var(--brand-copper);
-  --link-hover:  #de8d68;
-  --link-hover:  color-mix(in srgb, var(--brand-copper) 72%, var(--brand-offwhite));
+  --link:        var(--brand-portal);
+  --link-hover:  #9ccdf5;
+  --link-hover:  color-mix(in srgb, var(--brand-portal) 65%, var(--brand-ghost));
 
-  /* Odak halkası (klavye erişilebilirliği) */
-  --focus-ring: var(--brand-teal-light);
+  --focus-ring: var(--brand-portal);
 
-  /* Seçili metin */
-  --selection-bg:   rgba(23, 107, 115, 0.55);
-  --selection-text: var(--brand-offwhite);
+  --selection-bg:   rgba(99, 179, 237, 0.30);
+  --selection-text: var(--brand-ghost);
 
   /* ---------------------------------------------------------------------
-     3) TİPOGRAFİ
+     3) TİPOGRAFİ  —  JetBrains Mono her yerde; DM Sans sadece uzun prose'da
      --------------------------------------------------------------------- */
-  --font-sans: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto,
-               Helvetica, Arial, "Apple Color Emoji", "Segoe UI Emoji", sans-serif;
-  --font-mono: ui-monospace, "Cascadia Code", "SF Mono", "Roboto Mono", Menlo,
-               Consolas, "Liberation Mono", monospace;
+  --font-mono: "JetBrains Mono", ui-monospace, "Cascadia Code", "SF Mono",
+               Menlo, Consolas, "Liberation Mono", monospace;
+  --font-sans: "DM Sans", ui-sans-serif, system-ui, -apple-system, "Segoe UI",
+               Roboto, Helvetica, Arial, sans-serif;
 
-  /* Akışkan tip ölçeği: (min, tercih, max) — mobil-öncelikli */
-  --text--1:  clamp(0.80rem, 0.77rem + 0.15vw, 0.90rem);
-  --text-0:   clamp(1.00rem, 0.95rem + 0.25vw, 1.13rem);
-  --text-1:   clamp(1.20rem, 1.10rem + 0.50vw, 1.50rem);
-  --text-2:   clamp(1.45rem, 1.28rem + 0.85vw, 2.05rem);
-  --text-3:   clamp(1.90rem, 1.55rem + 1.75vw, 3.05rem);
-  --text-4:   clamp(2.35rem, 1.75rem + 3.00vw, 4.25rem);
+  /* Tip ölçeği — referans 14 / 16 / 30px. Başlıklar bağırmaz. */
+  --text--1:  0.875rem;                                   /* 14 — caption/meta */
+  --text-0:   1rem;                                       /* 16 — body/UI */
+  --text-1:   1.125rem;                                   /* 18 — kart başlığı */
+  --text-2:   1.375rem;                                   /* 22 — alt başlık */
+  --text-3:   1.875rem;                                   /* 30 — bölüm başlığı */
+  --text-4:   clamp(1.875rem, 1.4rem + 2vw, 2.75rem);     /* 30→44 — hero adı */
 
-  --leading-tight:  1.12;
-  --leading-snug:   1.28;
-  --leading-normal: 1.62;
+  --leading-tight:  1.25;
+  --leading-snug:   1.35;
+  --leading-normal: 1.5;
 
-  --tracking-tight:  -0.015em;
-  --tracking-wide:   0.02em;
-  --tracking-caps:   0.14em;   /* SPACED-OUT ETİKETLER İÇİN */
+  /* Referans: "letter spacing: normal" — hepsi 0 */
+  --tracking-tight:  0;
+  --tracking-wide:   0;
+  --tracking-caps:   0;
 
   --weight-normal: 400;
   --weight-medium: 500;
-  --weight-bold:   700;
+  --weight-bold:   500;   /* 500'ün üstüne çıkma */
 
   /* ---------------------------------------------------------------------
-     4) BOŞLUK ÖLÇEĞİ
+     4) BOŞLUK  (8px taban)
      --------------------------------------------------------------------- */
-  --space-3xs: 0.25rem;
-  --space-2xs: 0.375rem;
-  --space-xs:  0.625rem;
-  --space-s:   1rem;
-  --space-m:   1.5rem;
-  --space-l:   2.5rem;
-  --space-xl:  4rem;
-  --space-2xl: 6rem;
-  --space-3xl: 9rem;
+  --space-3xs: 0.25rem;   /* 4  */
+  --space-2xs: 0.5rem;    /* 8  */
+  --space-xs:  0.75rem;   /* 12 */
+  --space-s:   1rem;      /* 16 */
+  --space-m:   1.5rem;    /* 24 */
+  --space-l:   2rem;      /* 32 */
+  --space-xl:  3rem;      /* 48 */
+  --space-2xl: 4rem;      /* 64 */
+  --space-3xl: 6rem;      /* 96 */
 
-  /* Bölümler arası dikey ritim (mobilde küçük, masaüstünde büyük) */
-  --section-gap: clamp(3rem, 2rem + 3.5vw, 5.25rem);
+  /* Referans: bölümler arası 64px */
+  --section-gap: clamp(3rem, 2.4rem + 2.6vw, 4rem);
 
   /* ---------------------------------------------------------------------
-     5) YERLEŞİM
+     5) YERLEŞİM  —  dar, "araştırma notu" kolonu
      --------------------------------------------------------------------- */
-  --container:        68rem;   /* geniş içerik sınırı */
-  --container-narrow: 44rem;   /* okuma genişliği (case study metni) */
-  --gutter:           clamp(1.15rem, 0.8rem + 2.5vw, 2.5rem);
+  --container:        50rem;   /* ~800px */
+  --container-narrow: 40rem;   /* ~640px — prose */
+  --gutter:           clamp(1.15rem, 0.8rem + 2.5vw, 2rem);
 
-  --radius-s:  3px;
-  --radius:    5px;
-  --radius-l:  9px;
-  --radius-pill: 999px;
+  /* Referans: 8px her şeyde, 9999px sadece buton */
+  --radius-s:  8px;
+  --radius:    8px;
+  --radius-l:  8px;
+  --radius-pill: 9999px;
 
   /* ---------------------------------------------------------------------
-     6) KENAR GÖLGELERİ & GEÇİŞLER
+     6) GÖLGE & GEÇİŞ
+     Yükselti renk adımıyla ifade edilir; gölge sadece pill butonlarda.
      --------------------------------------------------------------------- */
-  --shadow-card: 0 1px 0 rgba(0, 0, 0, 0.35), 0 12px 28px -18px rgba(0, 0, 0, 0.7);
+  --shadow-card: none;
+  --shadow-sm: rgba(0, 0, 0, 0.1) 0px 4px 6px -1px, rgba(0, 0, 0, 0.1) 0px 2px 4px -2px;
+
   --transition:      160ms ease;
   --transition-slow: 320ms ease;
 
-  /* Header yüksekliği (sabit; hero'nun üst boşluğu buna göre) */
-  --header-h: 4rem;
+  --header-h: 3.5rem;
 
-  /* Üst katman sıraları */
   --z-header: 100;
   --z-nav-overlay: 200;
 }

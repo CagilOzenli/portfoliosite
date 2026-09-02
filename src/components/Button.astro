@@ -23,21 +23,24 @@ const attrs = external ? { target: '_blank', rel: 'noopener noreferrer' } : {};
 </a>
 
 <style>
+  /* Referans: 9999px pill, translucent tinted bg (opak dolgu YOK),
+     yumuşak çift gölge, JetBrains Mono 14px, düz metin. */
   .btn {
     display: inline-flex;
     align-items: center;
-    gap: 0.6rem;
-    padding: 0.85rem 1.35rem;
-    border-radius: var(--radius);
+    gap: 0.5rem;
+    padding: 0.5rem 1.25rem;
+    border-radius: var(--radius-pill);
     font-family: var(--font-mono);
     font-size: var(--text--1);
-    letter-spacing: var(--tracking-caps);
-    text-transform: uppercase;
+    letter-spacing: 0;
+    text-transform: none;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow: var(--shadow-sm);
     transition:
       background var(--transition),
       border-color var(--transition),
-      color var(--transition),
-      transform var(--transition);
+      color var(--transition);
   }
   .btn :global(svg) {
     transition: transform var(--transition);
@@ -46,23 +49,21 @@ const attrs = external ? { target: '_blank', rel: 'noopener noreferrer' } : {};
     transform: translateX(3px);
   }
 
+  /* Birincil: specimen-green tenti */
   .btn--primary {
-    background: var(--accent-strong);
-    color: var(--text);
-    border: 1px solid var(--accent-strong);
+    background: color-mix(in srgb, var(--accent-strong) 18%, transparent);
+    color: var(--accent-strong);
   }
   .btn--primary:hover {
-    background: color-mix(in srgb, var(--accent-strong) 82%, var(--text));
-    color: var(--text);
+    background: color-mix(in srgb, var(--accent-strong) 28%, transparent);
   }
 
+  /* İkincil: portal-blue tenti */
   .btn--ghost {
-    background: transparent;
-    color: var(--text);
-    border: 1px solid var(--border-strong);
+    background: color-mix(in srgb, var(--accent) 12%, transparent);
+    color: var(--accent);
   }
   .btn--ghost:hover {
-    border-color: var(--accent);
-    color: var(--accent);
+    background: color-mix(in srgb, var(--accent) 22%, transparent);
   }
 </style>

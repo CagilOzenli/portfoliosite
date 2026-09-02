@@ -31,7 +31,10 @@ const paragraphs = (text ?? '')
     display: flex;
     flex-direction: column;
     gap: var(--space-s);
-    color: var(--text-muted);
+    /* Referans: uzun prose'da DM Sans — monospace baskınlığına karşı
+       hafif humanist kontrast, seyrek kullanım. */
+    font-family: var(--font-sans);
+    color: var(--text);
     max-width: 62ch;
   }
   .prose :global(p) {
