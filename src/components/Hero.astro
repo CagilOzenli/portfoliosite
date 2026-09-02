@@ -103,6 +103,19 @@ const email = contact.email || settings.social.email;
     margin-top: var(--space-l);
   }
   .hero__social {
-    margin-top: var(--space-l);
+    /* "View Work" ile arasında daha çok nefes */
+    margin-top: var(--space-xl);
+  }
+
+  /* Mobil: invader "viewport" bandı metnin ÜSTÜNDE dursun, çakışmasın */
+  @media (max-width: 61.99rem) {
+    .hero {
+      align-items: flex-start;
+      min-height: auto;
+      padding-block: var(--space-s) var(--section-gap);
+    }
+    .hero__inner {
+      margin-top: calc(clamp(150px, 42vw, 200px) + var(--space-xl));
+    }
   }
 </style>

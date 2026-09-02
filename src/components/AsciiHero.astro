@@ -1,21 +1,23 @@
 ---
 /**
- * DENEY (terminal) — Hero görseli: ASCII "Space Invaders".
- * Bir game-dev portföyü için tematik imza görsel. İnvazorlar sağa-sola yürür,
- * aşağı iner; alttaki top otomatik nişan alıp ateş eder. Dalga temizlenince
- * yeniden gelir. Yanında küçük bir "simülasyon" HUD'u.
- * reduced-motion'da statik tek kare.
+ * DENEY (terminal) — Hero görseli: çerçeveli bir "engine viewport" içinde
+ * kendi kendine oynanan ASCII Space Invaders. Game-dev portföyü için tematik
+ * imza + debug penceresi hissi. reduced-motion'da statik tek kare.
  */
 ---
 
 <div class="si" aria-hidden="true">
-  <pre class="si__grid" data-si></pre>
+  <div class="si__screen">
+    <span class="si__bar">
+      <em>viewport</em>
+      <b data-wave>wave 1</b>
+    </span>
+    <pre class="si__grid" data-si></pre>
+  </div>
   <div class="si__hud" data-hud>
-    <span><b>wave</b> <i data-wave>1</i></span>
     <span><b>enemies</b> <i data-enemies>0</i></span>
     <span><b>score</b> <i data-score>0</i></span>
-    <span class="si__sep"></span>
-    <span class="si__stat"><i></i> firing</span>
+    <span class="si__stat"><i></i> simulating</span>
   </div>
 </div>
 
@@ -28,30 +30,58 @@
     pointer-events: none;
   }
 
+  /* --- çerçeveli mini ekran (mobil: hero metninin ÜSTÜNDE bir bant) --- */
+  .si__screen {
+    position: absolute;
+    left: 50%;
+    top: var(--space-m);
+    transform: translateX(-50%);
+    width: min(92vw, 440px);
+    height: clamp(150px, 42vw, 200px);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    background: color-mix(in srgb, var(--brand-void) 55%, transparent);
+    overflow: hidden;
+    opacity: 0.95;
+  }
+  .si__bar {
+    position: absolute;
+    inset: 0 0 auto 0;
+    height: 1.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 0.6rem;
+    border-bottom: 1px solid var(--border);
+    font-family: var(--font-mono);
+    font-size: 0.62rem;
+    color: var(--text-faint);
+    background: color-mix(in srgb, var(--brand-steel) 40%, transparent);
+  }
+  .si__bar em { font-style: normal; }
+  .si__bar b { font-weight: var(--weight-normal); color: var(--accent-amber); }
+
   .si__grid {
     position: absolute;
-    top: 50%;
     left: 50%;
-    transform: translate(-50%, -50%);
+    top: calc(50% + 0.75rem);
+    transform: translate(-50%, -50%) scale(var(--k, 1));
     margin: 0;
     font-family: var(--font-mono);
-    font-size: clamp(9px, 1.7vw, 15px);
-    line-height: 1.12;
+    font-size: 13px;
+    line-height: 1.16;
     letter-spacing: 0;
     white-space: pre;
     color: var(--text);
-    opacity: 0.55;
-    -webkit-mask-image: radial-gradient(140% 100% at 55% 45%, #000 66%, transparent 100%);
-    mask-image: radial-gradient(140% 100% at 55% 45%, #000 66%, transparent 100%);
   }
   .si__grid :global(.e) { color: var(--accent); }
   .si__grid :global(.e2) { color: var(--accent-strong); }
-  .si__grid :global(.ufo) { color: var(--brand-fault); }
   .si__grid :global(.gun) { color: var(--accent-amber); }
   .si__grid :global(.shot) { color: var(--text-strong); }
   .si__grid :global(.bomb) { color: var(--brand-fault); }
   .si__grid :global(.hit) { color: var(--accent-amber); }
 
+  /* --- HUD (ekranın altında / solunda) --- */
   .si__hud {
     position: absolute;
     left: var(--gutter);
@@ -67,12 +97,14 @@
     color: var(--accent-amber);
     display: inline-block;
     width: 3.6rem;
+    font-weight: var(--weight-normal);
   }
   .si__hud i { font-style: normal; color: var(--text-muted); }
-  .si__sep {
-    width: 8rem;
+  .si__stat {
+    margin-top: 0.25rem;
+    padding-top: 0.3rem;
     border-top: 1px solid var(--border);
-    margin: 0.2rem 0;
+    width: 8rem;
   }
   .si__stat i {
     display: inline-block;
@@ -88,14 +120,19 @@
   }
   @keyframes si-blink { 50% { opacity: 0.15; } }
 
+  /* --- masaüstü: ekranı içerik kolonunun sağ kenarına hizala --- */
   @media (min-width: 62rem) {
-    /* masaüstünde sağ yarıya kaydır — sol taraftaki metinle boğuşmasın */
-    .si__grid {
+    .si__screen {
       left: auto;
-      right: 4vw;
+      top: 50%;
+      right: calc(50% - var(--container) / 2 - 0.5rem);
       transform: translateY(-50%);
+      width: min(34vw, 380px);
+      height: min(30vw, 330px);
+      opacity: 0.85;
     }
   }
+
   @media (max-width: 48rem) {
     .si__hud { display: none; }
   }
@@ -110,15 +147,29 @@
   if (host) {
     const el: HTMLElement = host;
     const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-    const mobile = window.matchMedia('(max-width: 48rem)').matches;
 
-    const COLS = mobile ? 32 : 42;
-    const ROWS = mobile ? 16 : 18;
+    const COLS = 26;
+    const ROWS = 14;
     const GUN_ROW = ROWS - 1;
 
-    const EN_COLS = 6;
+    // grid'i çerçeveye sığdır (ölçek)
+    const screen = el.parentElement as HTMLElement | null;
+    function fit() {
+      if (!screen) return;
+      el.style.setProperty('--k', '1');
+      const availW = screen.clientWidth - 14;
+      const availH = screen.clientHeight - 26;
+      const k = Math.min(availW / el.offsetWidth, availH / el.offsetHeight, 1.7);
+      el.style.setProperty('--k', String(Math.max(0.4, k)));
+    }
+    let fitTimer = 0;
+    window.addEventListener('resize', () => {
+      clearTimeout(fitTimer);
+      fitTimer = window.setTimeout(fit, 150);
+    });
+    const EN_COLS = 5;
     const EN_ROWS = 3;
-    const GAP_X = 5;
+    const GAP_X = 4;
     const GAP_Y = 2;
 
     const FRAMES = [
@@ -129,26 +180,25 @@
 
     let alive: boolean[][];
     let fleet: { x: number; y: number; dir: number };
-    let gun = { x: (COLS >> 1) - 1 };
+    const gun = { x: (COLS >> 1) - 1 };
     let shots: { x: number; y: number }[] = [];
     let bombs: { x: number; y: number }[] = [];
     let hits: { x: number; y: number; t: number }[] = [];
     let wave = 1;
     let score = 0;
     let tick = 0;
-    let animFrame = 0;
     let cooldown = 0;
 
     function spawn() {
       alive = Array.from({ length: EN_ROWS }, () => Array(EN_COLS).fill(true));
-      fleet = { x: 3, y: 1, dir: 1 };
+      fleet = { x: 2, y: 1, dir: 1 };
       shots = [];
       bombs = [];
     }
     spawn();
 
-    const enemyX = (col: number) => fleet.x + col * GAP_X;
-    const enemyY = (row: number) => fleet.y + row * GAP_Y;
+    const enemyX = (c: number) => fleet.x + c * GAP_X;
+    const enemyY = (r: number) => fleet.y + r * GAP_Y;
     const countAlive = () => alive.flat().filter(Boolean).length;
 
     function bounds() {
@@ -165,7 +215,6 @@
 
     function step() {
       tick++;
-      animFrame = tick % 2;
       const n = countAlive();
       if (n === 0) {
         wave++;
@@ -173,14 +222,12 @@
         spawn();
         return;
       }
-      // invazorlar tabana ulaştıysa dalgayı yeniden başlat
-      if (bounds().maxY >= ROWS - 1) {
+      if (bounds().maxY >= GUN_ROW - 1) {
         spawn();
         return;
       }
 
-      // fleet hareketi — az kaldıkça hızlanır (her 1-3 tick'te bir)
-      const moveEvery = Math.max(1, Math.round(n / 6));
+      const moveEvery = Math.max(1, Math.round(n / 5));
       if (tick % moveEvery === 0) {
         const b = bounds();
         if ((fleet.dir > 0 && b.max >= COLS - 1) || (fleet.dir < 0 && b.min <= 0)) {
@@ -191,7 +238,7 @@
         }
       }
 
-      // top: en yakın canlı sütuna nişan al
+      // top nişan alır
       let targetX = gun.x;
       let best = Infinity;
       for (let c = 0; c < EN_COLS; c++)
@@ -204,18 +251,15 @@
             }
             break;
           }
-      if (gun.x < targetX) gun.x++;
-      else if (gun.x > targetX) gun.x--;
+      gun.x += Math.sign(targetX - gun.x);
       gun.x = Math.max(0, Math.min(COLS - 3, gun.x));
 
-      // ateş
       if (cooldown > 0) cooldown--;
       if (cooldown === 0 && shots.length < 2 && best < 2) {
         shots.push({ x: gun.x + 1, y: GUN_ROW - 1 });
-        cooldown = 4;
+        cooldown = 3;
       }
 
-      // mermiler
       shots = shots.filter((s) => {
         s.y -= 1;
         if (s.y < 0) return false;
@@ -233,11 +277,9 @@
         return true;
       });
 
-      // bombalar (nadiren)
-      if (Math.random() < 0.07 && bombs.length < 3) {
+      if (Math.random() < 0.06 && bombs.length < 2) {
         const cols: number[] = [];
-        for (let c = 0; c < EN_COLS; c++)
-          if (alive.some((row) => row[c])) cols.push(c);
+        for (let c = 0; c < EN_COLS; c++) if (alive.some((row) => row[c])) cols.push(c);
         if (cols.length) {
           const c = cols[(Math.random() * cols.length) | 0];
           let br = 0;
@@ -245,75 +287,64 @@
           bombs.push({ x: enemyX(c) + 1, y: enemyY(br) + 1 });
         }
       }
-      bombs = bombs.filter((b) => {
-        b.y += 1;
-        return b.y < ROWS;
-      });
-
+      bombs = bombs.filter((b) => (b.y += 1) < ROWS);
       hits = hits.filter((h) => --h.t > 0);
     }
 
     function render() {
       const buf: string[][] = Array.from({ length: ROWS }, () => Array(COLS).fill(' '));
       const cls: (string | null)[][] = Array.from({ length: ROWS }, () => Array(COLS).fill(null));
-
       const put = (r: number, c: number, ch: string, k: string) => {
         if (r < 0 || c < 0 || r >= ROWS || c >= COLS) return;
         buf[r][c] = ch;
         cls[r][c] = k;
       };
 
-      // invazorlar
-      for (let r = 0; r < EN_ROWS; r++) {
-        const shape = FRAMES[animFrame];
+      const shape = FRAMES[tick % 2];
+      for (let r = 0; r < EN_ROWS; r++)
         for (let c = 0; c < EN_COLS; c++) {
           if (!alive[r][c]) continue;
           const ex = enemyX(c), ey = enemyY(r);
           const kind = r === 0 ? 'e2' : 'e';
           for (let i = 0; i < 3; i++) put(ey, ex + i, shape[i], kind);
         }
-      }
-      // patlamalar
       for (const h of hits) {
         put(h.y, h.x - 1, '*', 'hit');
         put(h.y, h.x + 1, '*', 'hit');
         put(h.y, h.x, '+', 'hit');
       }
-      // bombalar
       for (const b of bombs) put(b.y, b.x, tick % 2 ? '¦' : ':', 'bomb');
-      // mermiler
       for (const s of shots) put(s.y, s.x, '|', 'shot');
-      // top
       for (let i = 0; i < 3; i++) put(GUN_ROW, gun.x + i, GUN[i], 'gun');
 
       let html = '';
       for (let r = 0; r < ROWS; r++) {
         for (let c = 0; c < COLS; c++) {
-          const ch = buf[r][c];
           const k = cls[r][c];
-          html += k ? `<span class="${k}">${ch}</span>` : ch === ' ' ? ' ' : ch;
+          html += k ? `<span class="${k}">${buf[r][c]}</span>` : buf[r][c];
         }
         html += '\n';
       }
       el.innerHTML = html;
-
-      if (waveOut) waveOut.textContent = String(wave);
+      if (waveOut) waveOut.textContent = 'wave ' + wave;
       if (enemiesOut) enemiesOut.textContent = String(countAlive());
       if (scoreOut) scoreOut.textContent = String(score);
     }
 
     render();
+    fit();
+    document.fonts?.ready.then(fit);
     if (!reduce) {
       let last = 0;
-      function loop(ts: number) {
-        if (ts - last > 130) {
+      const loop = (ts: number) => {
+        if (ts - last > 140) {
           last = ts;
           step();
           render();
         }
         if (!document.hidden) requestAnimationFrame(loop);
         else setTimeout(() => requestAnimationFrame(loop), 500);
-      }
+      };
       requestAnimationFrame(loop);
     }
   }
