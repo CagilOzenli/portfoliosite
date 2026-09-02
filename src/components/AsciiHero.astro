@@ -1,0 +1,108 @@
+---
+/**
+ * DENEY (Midjourney) — Hero'nun görseli: dönen bir ASCII küre/elipsoid.
+ * "Üreten metin hero'nun kendisidir." Canvas yok; tek bir <pre> içine
+ * her karede karakter matrisi yazılır. reduced-motion'da tek kare (statik).
+ */
+---
+
+<pre class="ascii" data-ascii aria-hidden="true"></pre>
+
+<style>
+  .ascii {
+    position: absolute;
+    inset: 0;
+    margin: 0;
+    display: grid;
+    place-items: center;
+    z-index: -1;
+    color: var(--text);
+    opacity: 0.34;
+    font-family: var(--font-mono);
+    font-size: clamp(8px, 1.7vw, 15px);
+    line-height: 1.05;
+    letter-spacing: 0.08em;
+    white-space: pre;
+    overflow: hidden;
+    pointer-events: none;
+    -webkit-mask-image: radial-gradient(135% 100% at 55% 42%, #000 62%, transparent 100%);
+    mask-image: radial-gradient(135% 100% at 55% 42%, #000 62%, transparent 100%);
+  }
+  @media (min-width: 62rem) {
+    .ascii {
+      /* masaüstünde sağ yarıya kaydır — sol taraftaki metinle boğuşmasın */
+      justify-items: end;
+      padding-right: 4vw;
+    }
+  }
+</style>
+
+<script>
+  const el = document.querySelector<HTMLPreElement>('[data-ascii]');
+  if (el) {
+    const node: HTMLPreElement = el;
+    const mobile = window.matchMedia('(max-width: 48rem)').matches;
+    const W = mobile ? 60 : 104;
+    const H = mobile ? 40 : 48;
+    const RAMP = ' .:-=+*#%@';
+    const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+    let A = 0.4;
+    let B = 0.9;
+    let last = 0;
+
+    function render() {
+      const out = new Float32Array(W * H).fill(-Infinity);
+      const buf = new Array(W * H).fill(' ');
+      const cA = Math.cos(A), sA = Math.sin(A);
+      const cB = Math.cos(B), sB = Math.sin(B);
+      const aspect = 0.5; // karakter en/boy düzeltmesi
+
+      for (let t = 0; t < Math.PI * 2; t += 0.06) {
+        for (let p = 0; p < Math.PI; p += 0.03) {
+          const sp = Math.sin(p), cp = Math.cos(p);
+          // birim küre noktası
+          let x = sp * Math.cos(t);
+          let y = sp * Math.sin(t);
+          let z = cp;
+          // Y ekseni etrafında (A), sonra X ekseni etrafında (B) döndür
+          let x1 = x * cA + z * sA;
+          let z1 = -x * sA + z * cA;
+          let y1 = y * cB - z1 * sB;
+          let z2 = y * sB + z1 * cB;
+
+          const depth = z2; // -1 .. 1
+          const px = Math.round(W / 2 + x1 * (W / 2 - 2));
+          const py = Math.round(H / 2 - y1 * (H / 2 - 1) * aspect * (H / W) * (W / H));
+          if (px < 0 || px >= W || py < 0 || py >= H) continue;
+          const idx = py * W + px;
+          if (depth > out[idx]) {
+            out[idx] = depth;
+            // ışık: sağ-üst-ön
+            const lum = (x1 * 0.5 + y1 * 0.6 + z2 * 0.6 + 1.7) / 3.4;
+            const ci = Math.max(0, Math.min(RAMP.length - 1, Math.floor(lum * (RAMP.length - 1))));
+            buf[idx] = RAMP[ci];
+          }
+        }
+      }
+
+      let s = '';
+      for (let r = 0; r < H; r++) s += buf.slice(r * W, r * W + W).join('') + '\n';
+      node.textContent = s;
+    }
+
+    function loop(ts: number) {
+      if (ts - last > 55) {
+        last = ts;
+        A += 0.022;
+        B += 0.009;
+        render();
+      }
+      if (!document.hidden) requestAnimationFrame(loop);
+      else setTimeout(() => requestAnimationFrame(loop), 400);
+    }
+
+    render();
+    if (!reduce) requestAnimationFrame(loop);
+  }
+</script>

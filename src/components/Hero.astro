@@ -1,15 +1,13 @@
 ---
 /**
- * Ana sayfanın ilk ekranı.
- * - Sanity'de "hero.backgroundImage" varsa: tam kaplayan görsel + koyu katman,
- *   metin önde; greybox gizlenir.
- * - Yoksa: sol metin / sağ greybox yer tutucu sahne + hafif CSS derinliği.
+ * DENEY (Midjourney) — tam ekran koyu hero.
+ * Görsel = ASCII generative küre (AsciiHero). Üstünde isim / rol / tagline /
+ * "View Work" pill + sosyal linkler. Fotoğraf/greybox kullanılmıyor.
  */
 import Button from './Button.astro';
 import SocialLinks from './SocialLinks.astro';
-import GreyboxScene from './GreyboxScene.astro';
+import AsciiHero from './AsciiHero.astro';
 import { getHero, getSiteSettings, getContact } from '../lib/content';
-import { thumbUrl, imageAlt } from '../lib/image';
 
 const [hero, settings, contact] = await Promise.all([
   getHero(),
@@ -20,63 +18,28 @@ const [hero, settings, contact] = await Promise.all([
 const linkedin = contact.linkedin || settings.social.linkedin;
 const github = contact.github || settings.social.github;
 const email = contact.email || settings.social.email;
-
-// Sadece genişlik isteniyor (yükseklik verilmiyor) -> Sanity görseli tek bir
-// sabit orana KIRPMIYOR, orijinal oranıyla döndürüyor. Kırpma/kadrajlama
-// işini tarayıcıda object-fit: cover yapıyor, böylece her ekran genişliğine
-// (mobil dar/uzun, masaüstü geniş/kısa) doğru uyum sağlıyor.
-const bgUrl = thumbUrl(hero.backgroundImage, 2400, 0);
-const hasBg = Boolean(bgUrl);
-
-// Studio'da işaretlenen "hotspot" (odak noktası) varsa kırpma o noktayı
-// merkezde tutar; yoksa görselin ortası kullanılır.
-const hotspot = hero.backgroundImage?.hotspot;
-const objectPosition = hotspot
-  ? `${(hotspot.x * 100).toFixed(1)}% ${(hotspot.y * 100).toFixed(1)}%`
-  : '50% 50%';
 ---
 
-<section class:list={['hero', { 'hero--image': hasBg }]}>
-  {
-    hasBg && (
-      <div class="hero__bg" aria-hidden={imageAlt(hero.backgroundImage) ? undefined : 'true'}>
-        <img
-          src={bgUrl}
-          alt={imageAlt(hero.backgroundImage, '')}
-          style={`object-position: ${objectPosition}`}
-          fetchpriority="high"
-          decoding="async"
-        />
-      </div>
-    )
-  }
+<section class="hero">
+  <AsciiHero />
 
   <div class="hero__inner container">
-    <div class="hero__text">
-      <h1 class="hero__name">{hero.name}</h1>
-      <p class="hero__role">{hero.role}</p>
-      <p class="hero__tagline">{hero.tagline}</p>
+    <p class="hero__eyebrow">// portfolio</p>
+    <h1 class="hero__name">{hero.name}</h1>
+    <p class="hero__role">{hero.role}</p>
+    <p class="hero__tagline">{hero.tagline}</p>
 
-      <div class="hero__actions">
-        <Button href="/work" icon="arrow">{hero.ctaLabel}</Button>
-      </div>
-
-      <SocialLinks
-        class="hero__social"
-        linkedin={linkedin}
-        github={github}
-        email={email}
-        variant="row"
-      />
+    <div class="hero__actions">
+      <Button href="/work" icon="arrow">{hero.ctaLabel}</Button>
     </div>
 
-    {
-      !hasBg && (
-        <div class="hero__visual">
-          <GreyboxScene />
-        </div>
-      )
-    }
+    <SocialLinks
+      class="hero__social"
+      linkedin={linkedin}
+      github={github}
+      email={email}
+      variant="row"
+    />
   </div>
 </section>
 
@@ -84,151 +47,46 @@ const objectPosition = hotspot
   .hero {
     position: relative;
     isolation: isolate;
-    padding-block: var(--space-m) var(--section-gap);
-  }
-
-  /* Görselsiz durumda hafif derinlik: köşeden yumuşak petrol parıltısı +
-     çok belirsiz bir ızgara dokusu. (Spec: aşırı glow yok — düşük opaklık.) */
-  .hero:not(.hero--image)::before {
-    content: '';
-    position: absolute;
-    inset: -10% -20% auto auto;
-    width: min(70vw, 720px);
-    aspect-ratio: 1;
-    z-index: -1;
-    background: radial-gradient(
-      circle at 70% 30%,
-      color-mix(in srgb, var(--accent-deep) 55%, transparent),
-      transparent 62%
-    );
-    filter: blur(10px);
-    pointer-events: none;
-  }
-  .hero:not(.hero--image)::after {
-    content: '';
-    position: absolute;
-    inset: 0;
-    z-index: -1;
-    background-image:
-      linear-gradient(var(--border) 1px, transparent 1px),
-      linear-gradient(90deg, var(--border) 1px, transparent 1px);
-    background-size: 64px 64px;
-    -webkit-mask-image: radial-gradient(circle at 75% 15%, #000, transparent 65%);
-    mask-image: radial-gradient(circle at 75% 15%, #000, transparent 65%);
-    opacity: 0.5;
-    pointer-events: none;
+    min-height: calc(100svh - var(--header-h));
+    display: flex;
+    align-items: center;
+    padding-block: var(--space-2xl) var(--section-gap);
+    border-bottom: 1px solid var(--border);
   }
 
   .hero__inner {
-    display: grid;
-    gap: var(--space-xl);
-    align-items: center;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .hero__eyebrow {
+    font-size: var(--text--1);
+    color: var(--accent-amber);
+    margin-bottom: var(--space-s);
   }
 
   .hero__name {
     font-size: var(--text-4);
-    letter-spacing: var(--tracking-tight);
-    /* Türkçe büyük harf aksanları (İ, Ö, Ğ) üst satıra girmesin diye nefes payı */
-    line-height: 1.16;
-    text-wrap: balance;
+    line-height: 1.15;
+    font-weight: var(--weight-normal);
+    color: var(--text-strong);
   }
   .hero__role {
-    margin-top: var(--space-xs);
-    font-family: var(--font-mono);
+    margin-top: var(--space-2xs);
     font-size: var(--text-1);
-    letter-spacing: var(--tracking-caps);
-    text-transform: uppercase;
     color: var(--accent);
   }
   .hero__tagline {
     margin-top: var(--space-m);
-    font-size: var(--text-1);
-    color: var(--text-muted);
-    max-width: 32ch;
-    text-wrap: balance;
+    font-size: var(--text-0);
+    color: var(--text);
+    max-width: 44ch;
   }
   .hero__actions {
     margin-top: var(--space-l);
   }
   .hero__social {
     margin-top: var(--space-l);
-  }
-
-  /* ---- Tam kaplayan arkaplan görseli ---- */
-  .hero--image {
-    padding-block: clamp(4rem, 12vh, 9rem) var(--section-gap);
-    min-height: clamp(30rem, 82svh, 46rem);
-    display: flex;
-    align-items: center;
-  }
-  .hero__bg {
-    position: absolute;
-    /* Header sabit (sticky) ve yarı saydam bir zemine sahip; görseli onun
-       ARKASINA kadar (sayfanın en tepesine) uzatıyoruz ki menü çizgisinde
-       görsel aniden kesilmiş gibi durmasın. Header z-index'i daha yüksek
-       olduğu için görsel görsel olarak onun altında kalır. */
-    top: calc(var(--header-h) * -1);
-    right: 0;
-    bottom: 0;
-    left: 0;
-    z-index: -1;
-    overflow: hidden;
-  }
-  .hero__bg img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    /* object-position frontmatter'dan (hotspot varsa ona göre) satır-içi geliyor */
-  }
-  /* Koyu katman: ALT KENAR her zaman düz --bg'ye tam erir (bir sonraki
-     bölümle dikişsiz birleşsin diye "keskin kesim" olmaz), üst kısımda
-     görsel görünür kalır. Masaüstünde buna metin tarafını okunur kılan
-     ikinci, yatay bir katman eklenir. */
-  .hero__bg::after {
-    content: '';
-    position: absolute;
-    inset: 0;
-    background-image: linear-gradient(
-      to top,
-      var(--bg) 0%,
-      color-mix(in srgb, var(--bg) 55%, transparent) 32%,
-      color-mix(in srgb, var(--bg) 22%, transparent) 68%,
-      color-mix(in srgb, var(--bg) 35%, transparent) 100%
-    );
-  }
-  .hero--image .hero__tagline {
-    color: color-mix(in srgb, var(--text) 82%, var(--bg));
-  }
-
-  @media (min-width: 62rem) {
-    .hero:not(.hero--image) .hero__inner {
-      grid-template-columns: minmax(0, 0.85fr) minmax(0, 1.15fr);
-      gap: var(--space-2xl);
-    }
-    .hero--image .hero__text {
-      max-width: 40rem;
-    }
-    .hero--image .hero__bg::after {
-      background-image:
-        linear-gradient(
-          to right,
-          var(--bg) 0%,
-          color-mix(in srgb, var(--bg) 45%, transparent) 42%,
-          transparent 75%
-        ),
-        linear-gradient(
-          to top,
-          var(--bg) 0%,
-          color-mix(in srgb, var(--bg) 45%, transparent) 32%,
-          transparent 68%,
-          color-mix(in srgb, var(--bg) 30%, transparent) 100%
-        );
-    }
-  }
-
-  @media (prefers-reduced-motion: reduce) {
-    .hero::before {
-      filter: none;
-    }
   }
 </style>

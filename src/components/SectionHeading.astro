@@ -1,6 +1,8 @@
 ---
 /**
- * Bölüm başlığı: küçük mono "kicker" + büyük başlık + opsiyonel açıklama.
+ * DENEY (Midjourney) — bölüm başlığı: küçük amber glif + 30px mono etiket,
+ * aynı satırda, weight 400. "Başlıklar bağırmaz."
+ * `kicker` metni glife eşlenir (yoksa jenerik glif).
  */
 interface Props {
   kicker?: string;
@@ -11,11 +13,23 @@ interface Props {
 }
 
 const { kicker, title, as: Tag = 'h2', id, align = 'start' } = Astro.props;
+
+const GLYPHS: Record<string, string> = {
+  about: 'ℹ',
+  work: '⚙',
+  'selected work': '⚙',
+  'systems lab': '⬡',
+  contact: '✉',
+  cv: '▤',
+};
+const glyph = GLYPHS[(kicker ?? title).toLowerCase()] ?? '▚';
 ---
 
 <header class:list={['sh', `sh--${align}`]}>
-  {kicker && <span class="kicker">{kicker}</span>}
-  <Tag id={id} class="sh__title">{title}</Tag>
+  <div class="sh__row">
+    <span class="sh__glyph" aria-hidden="true">{glyph}</span>
+    <Tag id={id} class="sh__title">{title}</Tag>
+  </div>
   {
     Astro.slots.has('default') && (
       <div class="sh__lead">
@@ -36,15 +50,26 @@ const { kicker, title, as: Tag = 'h2', id, align = 'start' } = Astro.props;
     align-items: center;
     text-align: center;
   }
-  .sh__title {
-    max-width: 20ch;
+  .sh__row {
+    display: flex;
+    align-items: baseline;
+    gap: var(--space-2xs);
   }
-  .sh--center .sh__title {
-    max-width: none;
+  .sh__glyph {
+    flex: none;
+    font-size: var(--text-0);
+    color: var(--accent-amber);
+    transform: translateY(-0.05em);
+  }
+  .sh__title {
+    font-size: var(--text-3);
+    font-weight: var(--weight-normal);
   }
   .sh__lead {
-    margin-top: var(--space-2xs);
-    max-width: 52ch;
+    max-width: 60ch;
     color: var(--text-muted);
+  }
+  .sh--center .sh__row {
+    justify-content: center;
   }
 </style>
