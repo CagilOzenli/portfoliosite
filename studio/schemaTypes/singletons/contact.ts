@@ -21,6 +21,12 @@ export default defineType({
       description: 'Boş bırakılırsa Site Settings → Social → email kullanılır.',
       validation: (Rule) => Rule.email(),
     }),
+    defineField({
+      name: 'phone',
+      title: 'Phone number',
+      type: 'string',
+      description: 'Uluslararası biçim önerilir, ör. +90 5xx xxx xx xx. Boş bırakılabilir.',
+    }),
     defineField({ name: 'linkedin', title: 'LinkedIn URL', type: 'url' }),
     defineField({ name: 'github', title: 'GitHub URL', type: 'url' }),
   ],

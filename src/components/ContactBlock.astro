@@ -15,8 +15,12 @@ const { as = 'h2', id = 'contact' } = Astro.props;
 
 const [contact, settings] = await Promise.all([getContact(), getSiteSettings()]);
 const email = contact.email || settings.social.email;
+const phone = contact.phone;
 const linkedin = contact.linkedin || settings.social.linkedin;
 const github = contact.github || settings.social.github;
+
+// tel: linki için sadece rakam / + bırak
+const telHref = phone ? `tel:${phone.replace(/[^\d+]/g, '')}` : null;
 ---
 
 <section class="contact" aria-labelledby={`${id}-title`}>
@@ -35,6 +39,7 @@ const github = contact.github || settings.social.github;
           <p class="contact__todo">Add an email address in the CMS (Contact Information).</p>
         )
       }
+      {telHref && <a class="contact__phone" href={telHref}>{phone}</a>}
     </div>
 
     <SocialLinks
@@ -50,6 +55,15 @@ const github = contact.github || settings.social.github;
 <style>
   .contact__actions {
     margin-bottom: var(--space-l);
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--space-m);
+  }
+  .contact__phone {
+    font-family: var(--font-mono);
+    font-size: var(--text--1);
+    color: var(--accent);
   }
   .contact__social {
     margin-top: var(--space-m);

@@ -42,7 +42,7 @@ export const ABOUT_QUERY = /* groq */ `
 export const CONTACT_QUERY = /* groq */ `
 *[_id == "contact"][0]{
   "heading": coalesce(heading, "Let's Talk"),
-  email, linkedin, github
+  email, phone, linkedin, github
 }`;
 
 /* ---- Projeler ----------------------------------------------------- */

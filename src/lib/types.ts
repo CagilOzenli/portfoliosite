@@ -64,6 +64,7 @@ export interface About {
 export interface Contact {
   heading: string;
   email?: string;
+  phone?: string;
   linkedin?: string;
   github?: string;
 }

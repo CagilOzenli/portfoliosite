@@ -1,49 +1,58 @@
 ---
 /**
- * DENEY (Midjourney) — Hero görseli: dönen ASCII küre + ince "veri akışı"
- * dokusu + küçük bir render/debug HUD'u (oyun motoru debug overlay hissi).
- * "Üreten metin hero'nun kendisidir." reduced-motion'da tek statik kare.
+ * DENEY (terminal) — Hero görseli: ASCII "Space Invaders".
+ * Bir game-dev portföyü için tematik imza görsel. İnvazorlar sağa-sola yürür,
+ * aşağı iner; alttaki top otomatik nişan alıp ateş eder. Dalga temizlenince
+ * yeniden gelir. Yanında küçük bir "simülasyon" HUD'u.
+ * reduced-motion'da statik tek kare.
  */
 ---
 
-<div class="ascii-wrap" aria-hidden="true">
-  <pre class="ascii" data-ascii></pre>
-  <div class="ascii-hud" data-hud>
-    <span><b>mesh</b> icosphere.128</span>
-    <span><b>verts</b> 2 562</span>
-    <span><b>rot.y</b> <i data-rot>0</i>&deg;</span>
-    <span class="ascii-hud__sep"></span>
-    <span class="ascii-hud__stat"><i></i> generating</span>
+<div class="si" aria-hidden="true">
+  <pre class="si__grid" data-si></pre>
+  <div class="si__hud" data-hud>
+    <span><b>wave</b> <i data-wave>1</i></span>
+    <span><b>enemies</b> <i data-enemies>0</i></span>
+    <span><b>score</b> <i data-score>0</i></span>
+    <span class="si__sep"></span>
+    <span class="si__stat"><i></i> firing</span>
   </div>
 </div>
 
 <style>
-  .ascii-wrap {
+  .si {
     position: absolute;
     inset: 0;
     z-index: -1;
-    pointer-events: none;
     overflow: hidden;
+    pointer-events: none;
   }
 
-  .ascii {
+  .si__grid {
     position: absolute;
-    inset: 0;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
     margin: 0;
-    display: grid;
-    place-items: center;
-    color: var(--text);
-    opacity: 0.34;
     font-family: var(--font-mono);
-    font-size: clamp(8px, 1.7vw, 15px);
-    line-height: 1.05;
-    letter-spacing: 0.08em;
+    font-size: clamp(9px, 1.7vw, 15px);
+    line-height: 1.12;
+    letter-spacing: 0;
     white-space: pre;
-    -webkit-mask-image: radial-gradient(135% 100% at 55% 42%, #000 62%, transparent 100%);
-    mask-image: radial-gradient(135% 100% at 55% 42%, #000 62%, transparent 100%);
+    color: var(--text);
+    opacity: 0.55;
+    -webkit-mask-image: radial-gradient(140% 100% at 55% 45%, #000 66%, transparent 100%);
+    mask-image: radial-gradient(140% 100% at 55% 45%, #000 66%, transparent 100%);
   }
+  .si__grid :global(.e) { color: var(--accent); }
+  .si__grid :global(.e2) { color: var(--accent-strong); }
+  .si__grid :global(.ufo) { color: var(--brand-fault); }
+  .si__grid :global(.gun) { color: var(--accent-amber); }
+  .si__grid :global(.shot) { color: var(--text-strong); }
+  .si__grid :global(.bomb) { color: var(--brand-fault); }
+  .si__grid :global(.hit) { color: var(--accent-amber); }
 
-  .ascii-hud {
+  .si__hud {
     position: absolute;
     left: var(--gutter);
     bottom: var(--space-l);
@@ -53,24 +62,19 @@
     font-family: var(--font-mono);
     font-size: 0.72rem;
     color: var(--text-faint);
-    opacity: 0.9;
   }
-  .ascii-hud b {
-    font-weight: var(--weight-normal);
+  .si__hud b {
     color: var(--accent-amber);
     display: inline-block;
-    width: 3.2rem;
+    width: 3.6rem;
   }
-  .ascii-hud i {
-    font-style: normal;
-    color: var(--text-muted);
-  }
-  .ascii-hud__sep {
+  .si__hud i { font-style: normal; color: var(--text-muted); }
+  .si__sep {
     width: 8rem;
     border-top: 1px solid var(--border);
     margin: 0.2rem 0;
   }
-  .ascii-hud__stat i {
+  .si__stat i {
     display: inline-block;
     width: 0.5rem;
     height: 0.5rem;
@@ -80,122 +84,237 @@
     vertical-align: middle;
   }
   @media (prefers-reduced-motion: no-preference) {
-    .ascii-hud__stat i {
-      animation: hud-blink 1.4s steps(1, end) infinite;
-    }
+    .si__stat i { animation: si-blink 1s steps(1, end) infinite; }
   }
-  @keyframes hud-blink {
-    50% {
-      opacity: 0.15;
-    }
-  }
+  @keyframes si-blink { 50% { opacity: 0.15; } }
 
   @media (min-width: 62rem) {
-    .ascii {
-      justify-items: end;
-      padding-right: 4vw;
+    /* masaüstünde sağ yarıya kaydır — sol taraftaki metinle boğuşmasın */
+    .si__grid {
+      left: auto;
+      right: 4vw;
+      transform: translateY(-50%);
     }
   }
   @media (max-width: 48rem) {
-    .ascii-hud {
-      display: none;
-    }
+    .si__hud { display: none; }
   }
 </style>
 
 <script>
-  const el = document.querySelector<HTMLPreElement>('[data-ascii]');
-  const rotOut = document.querySelector<HTMLElement>('[data-rot]');
-  const wrap = document.querySelector<HTMLElement>('.ascii-wrap');
+  const host = document.querySelector<HTMLElement>('[data-si]');
+  const waveOut = document.querySelector<HTMLElement>('[data-wave]');
+  const enemiesOut = document.querySelector<HTMLElement>('[data-enemies]');
+  const scoreOut = document.querySelector<HTMLElement>('[data-score]');
 
-  if (el && wrap) {
-    const node: HTMLPreElement = el;
-    const mobile = window.matchMedia('(max-width: 48rem)').matches;
-    const W = mobile ? 60 : 104;
-    const H = mobile ? 40 : 48;
-    const RAMP = ' .:-=+*#%@';
-    const NOISE = '.:-=+';
+  if (host) {
+    const el: HTMLElement = host;
     const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const mobile = window.matchMedia('(max-width: 48rem)').matches;
 
-    let A = 0.4;
-    let B = 0.9;
-    // hedef (pointer parallax) — mevcut açıya doğru yumuşak takip
-    let tiltX = 0;
-    let tiltY = 0;
-    let last = 0;
-    let frame = 0;
+    const COLS = mobile ? 32 : 42;
+    const ROWS = mobile ? 16 : 18;
+    const GUN_ROW = ROWS - 1;
 
-    const hero = node.closest('section');
-    hero?.addEventListener(
-      'pointermove',
-      (e) => {
-        const r = hero.getBoundingClientRect();
-        tiltX = ((e.clientX - r.left) / r.width - 0.5) * 0.9;
-        tiltY = ((e.clientY - r.top) / r.height - 0.5) * 0.6;
-      },
-      { passive: true },
-    );
+    const EN_COLS = 6;
+    const EN_ROWS = 3;
+    const GAP_X = 5;
+    const GAP_Y = 2;
 
-    function render() {
-      const out = new Float32Array(W * H).fill(-Infinity);
-      const buf = new Array(W * H).fill(' ');
+    const FRAMES = [
+      ['/', 'M', '\\'],
+      ['\\', 'M', '/'],
+    ];
+    const GUN = ['/', '^', '\\'];
 
-      // --- ince "veri akışı" dokusu (boş hücrelere seyrek karakter) ---
-      for (let i = 0; i < W * H; i++) {
-        const col = i % W;
-        const v = Math.sin(col * 12.9898 + Math.floor(i / W) * 78.233 + frame * 0.12) * 43758.5453;
-        if ((v - Math.floor(v)) > 0.976) buf[i] = NOISE[(col + frame) % NOISE.length];
+    let alive: boolean[][];
+    let fleet: { x: number; y: number; dir: number };
+    let gun = { x: (COLS >> 1) - 1 };
+    let shots: { x: number; y: number }[] = [];
+    let bombs: { x: number; y: number }[] = [];
+    let hits: { x: number; y: number; t: number }[] = [];
+    let wave = 1;
+    let score = 0;
+    let tick = 0;
+    let animFrame = 0;
+    let cooldown = 0;
+
+    function spawn() {
+      alive = Array.from({ length: EN_ROWS }, () => Array(EN_COLS).fill(true));
+      fleet = { x: 3, y: 1, dir: 1 };
+      shots = [];
+      bombs = [];
+    }
+    spawn();
+
+    const enemyX = (col: number) => fleet.x + col * GAP_X;
+    const enemyY = (row: number) => fleet.y + row * GAP_Y;
+    const countAlive = () => alive.flat().filter(Boolean).length;
+
+    function bounds() {
+      let min = Infinity, max = -Infinity, maxY = -Infinity;
+      for (let r = 0; r < EN_ROWS; r++)
+        for (let c = 0; c < EN_COLS; c++)
+          if (alive[r][c]) {
+            min = Math.min(min, enemyX(c));
+            max = Math.max(max, enemyX(c) + 2);
+            maxY = Math.max(maxY, enemyY(r));
+          }
+      return { min, max, maxY };
+    }
+
+    function step() {
+      tick++;
+      animFrame = tick % 2;
+      const n = countAlive();
+      if (n === 0) {
+        wave++;
+        score += 100;
+        spawn();
+        return;
+      }
+      // invazorlar tabana ulaştıysa dalgayı yeniden başlat
+      if (bounds().maxY >= ROWS - 1) {
+        spawn();
+        return;
       }
 
-      const aRot = A + tiltX;
-      const bRot = B + tiltY;
-      const cA = Math.cos(aRot), sA = Math.sin(aRot);
-      const cB = Math.cos(bRot), sB = Math.sin(bRot);
-
-      for (let t = 0; t < Math.PI * 2; t += 0.06) {
-        for (let p = 0; p < Math.PI; p += 0.03) {
-          const sp = Math.sin(p), cp = Math.cos(p);
-          const x = sp * Math.cos(t);
-          const y = sp * Math.sin(t);
-          const z = cp;
-          const x1 = x * cA + z * sA;
-          const z1 = -x * sA + z * cA;
-          const y1 = y * cB - z1 * sB;
-          const z2 = y * sB + z1 * cB;
-
-          const px = Math.round(W / 2 + x1 * (W / 2 - 2));
-          const py = Math.round(H / 2 - y1 * (H / 2 - 1) * 0.5);
-          if (px < 0 || px >= W || py < 0 || py >= H) continue;
-          const idx = py * W + px;
-          if (z2 > out[idx]) {
-            out[idx] = z2;
-            const lum = (x1 * 0.5 + y1 * 0.6 + z2 * 0.6 + 1.7) / 3.4;
-            const ci = Math.max(0, Math.min(RAMP.length - 1, Math.floor(lum * (RAMP.length - 1))));
-            buf[idx] = RAMP[ci];
-          }
+      // fleet hareketi — az kaldıkça hızlanır (her 1-3 tick'te bir)
+      const moveEvery = Math.max(1, Math.round(n / 6));
+      if (tick % moveEvery === 0) {
+        const b = bounds();
+        if ((fleet.dir > 0 && b.max >= COLS - 1) || (fleet.dir < 0 && b.min <= 0)) {
+          fleet.dir *= -1;
+          fleet.y += 1;
+        } else {
+          fleet.x += fleet.dir;
         }
       }
 
-      let s = '';
-      for (let r = 0; r < H; r++) s += buf.slice(r * W, r * W + W).join('') + '\n';
-      node.textContent = s;
+      // top: en yakın canlı sütuna nişan al
+      let targetX = gun.x;
+      let best = Infinity;
+      for (let c = 0; c < EN_COLS; c++)
+        for (let r = EN_ROWS - 1; r >= 0; r--)
+          if (alive[r][c]) {
+            const ex = enemyX(c) + 1;
+            if (Math.abs(ex - (gun.x + 1)) < best) {
+              best = Math.abs(ex - (gun.x + 1));
+              targetX = ex - 1;
+            }
+            break;
+          }
+      if (gun.x < targetX) gun.x++;
+      else if (gun.x > targetX) gun.x--;
+      gun.x = Math.max(0, Math.min(COLS - 3, gun.x));
 
-      if (rotOut) rotOut.textContent = String(Math.round(((A * 180) / Math.PI) % 360));
+      // ateş
+      if (cooldown > 0) cooldown--;
+      if (cooldown === 0 && shots.length < 2 && best < 2) {
+        shots.push({ x: gun.x + 1, y: GUN_ROW - 1 });
+        cooldown = 4;
+      }
+
+      // mermiler
+      shots = shots.filter((s) => {
+        s.y -= 1;
+        if (s.y < 0) return false;
+        for (let r = 0; r < EN_ROWS; r++)
+          for (let c = 0; c < EN_COLS; c++)
+            if (alive[r][c]) {
+              const ex = enemyX(c), ey = enemyY(r);
+              if (s.y === ey && s.x >= ex && s.x <= ex + 2) {
+                alive[r][c] = false;
+                score += 20;
+                hits.push({ x: ex + 1, y: ey, t: 3 });
+                return false;
+              }
+            }
+        return true;
+      });
+
+      // bombalar (nadiren)
+      if (Math.random() < 0.07 && bombs.length < 3) {
+        const cols: number[] = [];
+        for (let c = 0; c < EN_COLS; c++)
+          if (alive.some((row) => row[c])) cols.push(c);
+        if (cols.length) {
+          const c = cols[(Math.random() * cols.length) | 0];
+          let br = 0;
+          for (let r = EN_ROWS - 1; r >= 0; r--) if (alive[r][c]) { br = r; break; }
+          bombs.push({ x: enemyX(c) + 1, y: enemyY(br) + 1 });
+        }
+      }
+      bombs = bombs.filter((b) => {
+        b.y += 1;
+        return b.y < ROWS;
+      });
+
+      hits = hits.filter((h) => --h.t > 0);
     }
 
-    function loop(ts: number) {
-      if (ts - last > 55) {
-        last = ts;
-        frame++;
-        A += 0.022;
-        B += 0.009;
-        render();
+    function render() {
+      const buf: string[][] = Array.from({ length: ROWS }, () => Array(COLS).fill(' '));
+      const cls: (string | null)[][] = Array.from({ length: ROWS }, () => Array(COLS).fill(null));
+
+      const put = (r: number, c: number, ch: string, k: string) => {
+        if (r < 0 || c < 0 || r >= ROWS || c >= COLS) return;
+        buf[r][c] = ch;
+        cls[r][c] = k;
+      };
+
+      // invazorlar
+      for (let r = 0; r < EN_ROWS; r++) {
+        const shape = FRAMES[animFrame];
+        for (let c = 0; c < EN_COLS; c++) {
+          if (!alive[r][c]) continue;
+          const ex = enemyX(c), ey = enemyY(r);
+          const kind = r === 0 ? 'e2' : 'e';
+          for (let i = 0; i < 3; i++) put(ey, ex + i, shape[i], kind);
+        }
       }
-      if (!document.hidden) requestAnimationFrame(loop);
-      else setTimeout(() => requestAnimationFrame(loop), 400);
+      // patlamalar
+      for (const h of hits) {
+        put(h.y, h.x - 1, '*', 'hit');
+        put(h.y, h.x + 1, '*', 'hit');
+        put(h.y, h.x, '+', 'hit');
+      }
+      // bombalar
+      for (const b of bombs) put(b.y, b.x, tick % 2 ? '¦' : ':', 'bomb');
+      // mermiler
+      for (const s of shots) put(s.y, s.x, '|', 'shot');
+      // top
+      for (let i = 0; i < 3; i++) put(GUN_ROW, gun.x + i, GUN[i], 'gun');
+
+      let html = '';
+      for (let r = 0; r < ROWS; r++) {
+        for (let c = 0; c < COLS; c++) {
+          const ch = buf[r][c];
+          const k = cls[r][c];
+          html += k ? `<span class="${k}">${ch}</span>` : ch === ' ' ? ' ' : ch;
+        }
+        html += '\n';
+      }
+      el.innerHTML = html;
+
+      if (waveOut) waveOut.textContent = String(wave);
+      if (enemiesOut) enemiesOut.textContent = String(countAlive());
+      if (scoreOut) scoreOut.textContent = String(score);
     }
 
     render();
-    if (!reduce) requestAnimationFrame(loop);
+    if (!reduce) {
+      let last = 0;
+      function loop(ts: number) {
+        if (ts - last > 130) {
+          last = ts;
+          step();
+          render();
+        }
+        if (!document.hidden) requestAnimationFrame(loop);
+        else setTimeout(() => requestAnimationFrame(loop), 500);
+      }
+      requestAnimationFrame(loop);
+    }
   }
 </script>

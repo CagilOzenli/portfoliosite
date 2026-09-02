@@ -39,11 +39,12 @@ export default defineType({
         },
       ],
       initialValue: [
+        { label: 'Home', path: '/' },
         { label: 'About', path: '/about' },
-        { label: 'Download CV', path: '/cv' },
         { label: 'Work', path: '/work' },
         { label: 'Systems Lab', path: '/systems-lab' },
         { label: 'Contact', path: '/contact' },
+        { label: 'Download CV', path: '/cv' },
       ],
       validation: (Rule) => Rule.min(1),
     }),
