@@ -25,7 +25,9 @@ const email = contact.email || settings.social.email;
 
   <button type="button" class="hero__egg" data-si-play>
     <span class="hero__egg-i">►</span> play
-    <span class="hero__egg-note">the background is playable — space invaders</span>
+    <span class="hero__egg-note">
+      <span class="hero__egg-long">the background is </span>playable<span class="hero__egg-long"> — space invaders</span>
+    </span>
   </button>
 
   <div class="hero__inner container">
@@ -38,13 +40,9 @@ const email = contact.email || settings.social.email;
       <Button href="/work" icon="arrow">{hero.ctaLabel}</Button>
     </div>
 
-    <SocialLinks
-      class="hero__social"
-      linkedin={linkedin}
-      github={github}
-      email={email}
-      variant="row"
-    />
+    <div class="hero__social">
+      <SocialLinks linkedin={linkedin} github={github} email={email} variant="row" />
+    </div>
   </div>
 </section>
 
@@ -87,8 +85,8 @@ const email = contact.email || settings.social.email;
   .hero__egg:hover .hero__egg-note {
     color: var(--text-muted);
   }
-  @media (max-width: 30rem) {
-    .hero__egg-note { display: none; }
+  @media (max-width: 34rem) {
+    .hero__egg-long { display: none; }
   }
 
   .hero__inner {
@@ -140,7 +138,8 @@ const email = contact.email || settings.social.email;
     margin-top: var(--space-l);
   }
   .hero__social {
-    margin-top: var(--space-xl);
+    /* "View Work" ile linkler arasını iyice aç */
+    margin-top: var(--space-2xl);
   }
 
   @media (max-width: 61.99rem) {
