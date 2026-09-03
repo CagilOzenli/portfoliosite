@@ -25,9 +25,9 @@
     </div>
 
     <div class="si__pad" data-pad hidden>
-      <button type="button" data-btn="left" aria-label="left">◄</button>
-      <button type="button" data-btn="fire" aria-label="fire">▲</button>
-      <button type="button" data-btn="right" aria-label="right">►</button>
+      <button type="button" data-btn="left" aria-label="move left">&lt;</button>
+      <button type="button" data-btn="fire" aria-label="fire">^</button>
+      <button type="button" data-btn="right" aria-label="move right">&gt;</button>
     </div>
   </div>
 
@@ -81,7 +81,7 @@
     margin: 0;
     font-family: var(--font-mono);
     font-size: 0.7rem;
-    color: var(--text-faint);
+    color: var(--text-ghost); /* dekoratif — WCAG dışı */
   }
   .si__hud [data-statdot] { color: var(--accent-strong); }
   @media (prefers-reduced-motion: no-preference) {
@@ -148,8 +148,8 @@
     padding: 0.6rem;
   }
   .si__pad button {
-    width: 3.2rem;
-    height: 2.6rem;
+    min-width: 3.4rem;
+    height: 2.9rem; /* >= 44px */
     border: 1px solid var(--border-strong);
     border-radius: var(--radius);
     background: color-mix(in srgb, var(--brand-steel) 70%, transparent);

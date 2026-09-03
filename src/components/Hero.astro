@@ -24,7 +24,10 @@ const email = contact.email || settings.social.email;
   <AsciiHero />
 
   <button type="button" class="hero__egg" data-si-play>
-    <span class="hero__egg-i">►</span> play
+    <svg class="hero__egg-i" width="9" height="11" viewBox="0 0 9 11" aria-hidden="true">
+      <path d="M0 0l9 5.5L0 11z" fill="currentColor" />
+    </svg>
+    play
     <span class="hero__egg-note">
       <span class="hero__egg-long">the background is </span>playable<span class="hero__egg-long"> — space invaders</span>
     </span>
@@ -75,6 +78,7 @@ const email = contact.email || settings.social.email;
   }
   .hero__egg-i {
     color: var(--accent-amber);
+    align-self: center;
   }
   .hero__egg-note {
     color: var(--text-faint);
@@ -138,8 +142,8 @@ const email = contact.email || settings.social.email;
     margin-top: var(--space-l);
   }
   .hero__social {
-    /* "View Work" ile linkler arasını iyice aç */
-    margin-top: var(--space-2xl);
+    /* "View Work" ile linkler arası — 48 çok, 0 az; ~40px ortası */
+    margin-top: 2.5rem;
   }
 
   @media (max-width: 61.99rem) {

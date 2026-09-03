@@ -30,15 +30,15 @@ const paragraphs = (text ?? '')
   .prose {
     display: flex;
     flex-direction: column;
-    gap: var(--space-s);
-    /* Referans: uzun prose'da DM Sans — monospace baskınlığına karşı
-       hafif humanist kontrast, seyrek kullanım. */
-    font-family: var(--font-sans);
+    gap: var(--space-m);
+    /* Tek aile disiplini: prose de JetBrains Mono. Mono paragraflar için
+       biraz daha bol satır aralığı + dar ölçü kolonu okunurluğu korur. */
+    font-family: var(--font-mono);
     color: var(--text);
-    max-width: 62ch;
+    max-width: 68ch;
   }
   .prose :global(p) {
-    line-height: var(--leading-normal);
+    line-height: 1.65;
     white-space: pre-line; /* CMS'teki tek satır sonlarını korur */
   }
 </style>
