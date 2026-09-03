@@ -1,8 +1,8 @@
 ---
 /**
- * DENEY (Midjourney) — tam ekran koyu hero.
- * Görsel = ASCII generative küre (AsciiHero). Üstünde isim / rol / tagline /
- * "View Work" pill + sosyal linkler. Fotoğraf/greybox kullanılmıyor.
+ * DENEY (terminal) — tam ekran koyu hero.
+ * Arka plan = hero'yu kaplayan ASCII Space Invaders (AsciiHero) — soluk, tıklanamaz.
+ * Header'ın hemen altında küçük bir "▶ play" easter-egg tetikleyicisi.
  */
 import Button from './Button.astro';
 import SocialLinks from './SocialLinks.astro';
@@ -22,6 +22,11 @@ const email = contact.email || settings.social.email;
 
 <section class="hero">
   <AsciiHero />
+
+  <button type="button" class="hero__egg" data-si-play>
+    <span class="hero__egg-i">►</span> play
+    <span class="hero__egg-note">the background is playable — space invaders</span>
+  </button>
 
   <div class="hero__inner container">
     <p class="hero__eyebrow">// portfolio</p>
@@ -53,7 +58,42 @@ const email = contact.email || settings.social.email;
     border-bottom: 1px solid var(--border);
   }
 
+  /* header'ın hemen altında küçük easter-egg tetikleyicisi */
+  .hero__egg {
+    position: absolute;
+    top: var(--space-s);
+    left: var(--gutter);
+    z-index: 3;
+    display: inline-flex;
+    align-items: baseline;
+    gap: 0.4rem;
+    background: none;
+    border: 0;
+    padding: 0.15rem 0;
+    font-family: var(--font-mono);
+    font-size: var(--text--1);
+    color: var(--accent);
+    cursor: pointer;
+  }
+  .hero__egg-i {
+    color: var(--accent-amber);
+  }
+  .hero__egg-note {
+    color: var(--text-faint);
+  }
+  .hero__egg:hover {
+    color: var(--link-hover);
+  }
+  .hero__egg:hover .hero__egg-note {
+    color: var(--text-muted);
+  }
+  @media (max-width: 30rem) {
+    .hero__egg-note { display: none; }
+  }
+
   .hero__inner {
+    position: relative;
+    z-index: 1;
     display: flex;
     flex-direction: column;
     align-items: flex-start;
@@ -83,9 +123,7 @@ const email = contact.email || settings.social.email;
     }
   }
   @keyframes caret-blink {
-    50% {
-      opacity: 0;
-    }
+    50% { opacity: 0; }
   }
   .hero__role {
     margin-top: var(--space-2xs);
@@ -102,19 +140,13 @@ const email = contact.email || settings.social.email;
     margin-top: var(--space-l);
   }
   .hero__social {
-    /* "View Work" ile arasında daha çok nefes */
     margin-top: var(--space-xl);
   }
 
-  /* Mobil: invader "viewport" bandı metnin ÜSTÜNDE dursun, çakışmasın */
   @media (max-width: 61.99rem) {
     .hero {
-      align-items: flex-start;
-      min-height: auto;
-      padding-block: var(--space-s) var(--section-gap);
-    }
-    .hero__inner {
-      margin-top: calc(clamp(150px, 42vw, 200px) + var(--space-xl));
+      min-height: 78svh;
+      padding-block: var(--space-2xl) var(--section-gap);
     }
   }
 </style>

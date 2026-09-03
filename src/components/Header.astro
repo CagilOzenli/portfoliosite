@@ -1,8 +1,7 @@
 ---
 /**
- * DENEY (Midjourney) — sticky terminal nav bar. Hamburger yok.
- * Tam genişlik steel-navy çubuk; düz metin linkler + "specimen" pill butonlar.
- * Dar ekranda çubuk yatay kaydırılır.
+ * DENEY (terminal) — sticky terminal nav bar. Hamburger yok.
+ * Tüm öğeler düz metin link (kapsül yok). Dar ekranda çubuk yatay kaydırılır.
  */
 import { getNavigation } from '../lib/content';
 
@@ -14,12 +13,6 @@ function isActive(path: string) {
   if (p === '/') return current === '/';
   return current === p || current.startsWith(p + '/');
 }
-
-// Pill olarak gösterilecek yollar; gerisi düz link
-const PILL: Record<string, 'green' | 'amber'> = {
-  '/cv': 'amber',
-  '/contact': 'green',
-};
 ---
 
 <header class="bar">
@@ -27,20 +20,17 @@ const PILL: Record<string, 'green' | 'amber'> = {
     <a href="/" class="bar__brand">~/cagil</a>
     <ul class="bar__list">
       {
-        nav.map((item) => {
-          const pill = PILL[item.path];
-          return (
-            <li>
-              <a
-                href={item.path}
-                class:list={['bar__item', pill && `bar__pill bar__pill--${pill}`]}
-                aria-current={isActive(item.path) ? 'page' : undefined}
-              >
-                {item.label}
-              </a>
-            </li>
-          );
-        })
+        nav.map((item) => (
+          <li>
+            <a
+              href={item.path}
+              class="bar__item"
+              aria-current={isActive(item.path) ? 'page' : undefined}
+            >
+              {item.label}
+            </a>
+          </li>
+        ))
       }
     </ul>
   </nav>
@@ -69,7 +59,6 @@ const PILL: Record<string, 'green' | 'amber'> = {
   .bar__inner::-webkit-scrollbar {
     display: none;
   }
-  /* Dar ekranda sağ kenarda "devamı var" ipucu */
   @media (max-width: 48rem) {
     .bar__inner {
       gap: var(--space-s);
@@ -90,7 +79,7 @@ const PILL: Record<string, 'green' | 'amber'> = {
   .bar__list {
     display: flex;
     align-items: center;
-    gap: var(--space-s);
+    gap: var(--space-m);
     margin-left: auto;
   }
   .bar__list li {
@@ -109,31 +98,8 @@ const PILL: Record<string, 'green' | 'amber'> = {
   .bar__item[aria-current='page'] {
     color: var(--text-strong);
   }
-
-  /* specimen pill butonlar */
-  .bar__pill {
-    padding: 0.35rem 0.9rem;
-    border-radius: var(--radius-pill);
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    box-shadow: var(--shadow-sm);
-  }
-  .bar__pill--green {
-    background: color-mix(in srgb, var(--brand-specimen) 18%, transparent);
-    color: var(--brand-specimen);
-  }
-  .bar__pill--green:hover {
-    background: color-mix(in srgb, var(--brand-specimen) 28%, transparent);
-    color: var(--brand-specimen);
-  }
-  .bar__pill--amber {
-    background: color-mix(in srgb, var(--brand-amber) 16%, transparent);
-    color: var(--brand-amber);
-  }
-  .bar__pill--amber:hover {
-    background: color-mix(in srgb, var(--brand-amber) 26%, transparent);
-    color: var(--brand-amber);
-  }
-  .bar__pill[aria-current='page'] {
-    outline: 1px solid currentColor;
+  .bar__item[aria-current='page']::before {
+    content: '> ';
+    color: var(--accent-amber);
   }
 </style>

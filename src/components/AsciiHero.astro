@@ -1,46 +1,37 @@
 ---
 /**
- * DENEY (terminal) — Hero görseli: çerçeveli "engine viewport" içinde
- * ASCII Space Invaders.
- *   - Ambient: kendi kendine oynanır (düşük opaklık, arka plan).
- *   - Easter egg: panele tıkla/dokun -> OYNANABİLİR. Panel modal olur,
- *     ok tuşları + boşluk (mobilde ekran butonları), 3 can, skor,
- *     game over + tekrar, yüksek skor localStorage'da. ESC ile çık.
- * reduced-motion: ambient durur ama kullanıcı "play"e basarsa oyun çalışır.
+ * DENEY (terminal) — Hero'nun TAMAMININ arkasında çalışan ASCII Space Invaders.
+ *   - Ambient: tüm hero'yu kaplar, çok düşük opaklık, tıklanamaz (metin önde).
+ *   - Easter egg: sayfadaki [data-si-play] öğesine tıkla ya da "P" tuşuna bas
+ *     -> ortada modal oyun (klavye + dokunmatik, 3 can, skor, dalga, game over
+ *     + tekrar, yüksek skor localStorage). ESC / kapat / arka plan -> ambient.
+ * reduced-motion: ambient durur; kullanıcı başlatırsa oyun çalışır.
  */
 ---
 
-<div class="si" data-si-root>
-  <div class="si__screen" data-screen tabindex="-1">
-    <div class="si__bar">
-      <em>viewport</em>
-      <button type="button" class="si__play" data-play aria-label="Play the mini-game">▶&nbsp;play</button>
-      <b data-wave>wave 1</b>
-    </div>
-
+<div class="si" data-si-root aria-hidden="true">
+  <div class="si__stage" data-stage>
     <pre class="si__grid" data-si></pre>
+
+    <div class="si__hb" data-hb hidden>
+      <span data-wave>wave 1</span>
+      <button type="button" class="si__x" data-close aria-label="Close game">esc ×</button>
+    </div>
 
     <div class="si__over" data-over hidden>
       <p class="si__over-t" data-over-title>game over</p>
       <p class="si__over-s" data-over-score></p>
-      <p class="si__over-h" data-over-hint>press <kbd>space</kbd> to retry · <kbd>esc</kbd> to exit</p>
+      <p class="si__over-h">press <kbd>space</kbd> — retry · <kbd>esc</kbd> — exit</p>
     </div>
 
-    <div class="si__pad" data-pad hidden aria-hidden="true">
+    <div class="si__pad" data-pad hidden>
       <button type="button" data-btn="left" aria-label="left">◄</button>
       <button type="button" data-btn="fire" aria-label="fire">▲</button>
       <button type="button" data-btn="right" aria-label="right">►</button>
     </div>
-
-    <button type="button" class="si__close" data-close aria-label="Close game" hidden>×</button>
   </div>
 
-  <div class="si__hud" data-hud>
-    <span><b>enemies</b> <i data-enemies>0</i></span>
-    <span><b>score</b> <i data-score>0</i></span>
-    <span class="si__stat"><i></i> <span data-statlabel>simulating</span></span>
-  </div>
-
+  <p class="si__hud" data-hud><span data-statdot>●</span> <span data-statlabel>simulating</span> · <span data-score>0</span></p>
   <div class="si__backdrop" data-backdrop hidden></div>
 </div>
 
@@ -48,77 +39,33 @@
   .si {
     position: absolute;
     inset: 0;
-    z-index: -1;
+    z-index: 0;
     overflow: hidden;
     pointer-events: none;
   }
-  /* component display kuralları [hidden]'ı ezmesin */
   .si [hidden] {
     display: none !important;
   }
 
-  .si__screen {
+  /* --- AMBIENT: hero'yu kaplayan soluk arka plan --- */
+  .si__stage {
     position: absolute;
-    left: 50%;
-    top: var(--space-m);
-    transform: translateX(-50%);
-    width: min(92vw, 440px);
-    height: clamp(150px, 42vw, 200px);
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-    background: color-mix(in srgb, var(--brand-void) 55%, transparent);
-    overflow: hidden;
-    opacity: 0.95;
-    outline: none;
-    cursor: pointer;
-    pointer-events: auto;
-    transition: box-shadow var(--transition), border-color var(--transition);
+    inset: 0;
+    display: grid;
+    place-items: center;
   }
-  .si__screen:hover,
-  .si__screen:focus-visible {
-    border-color: var(--border-strong);
-  }
-
-  .si__bar {
-    position: absolute;
-    inset: 0 0 auto 0;
-    height: 1.6rem;
-    display: flex;
-    align-items: center;
-    gap: 0.6rem;
-    padding: 0 0.55rem;
-    border-bottom: 1px solid var(--border);
-    font-family: var(--font-mono);
-    font-size: 0.62rem;
-    color: var(--text-faint);
-    background: color-mix(in srgb, var(--brand-steel) 40%, transparent);
-    z-index: 2;
-  }
-  .si__bar em { font-style: normal; }
-  .si__bar b { font-weight: var(--weight-normal); color: var(--accent-amber); margin-left: auto; }
-  .si__play {
-    background: none;
-    border: 0;
-    padding: 0.1rem 0.3rem;
-    font: inherit;
-    color: var(--accent);
-    cursor: pointer;
-    border-radius: 3px;
-  }
-  .si__play:hover { color: var(--link-hover); background: color-mix(in srgb, var(--accent) 12%, transparent); }
-
   .si__grid {
-    position: absolute;
-    left: 50%;
-    top: calc(50% + 0.8rem);
-    transform: translate(-50%, -50%) scale(var(--k, 1));
     margin: 0;
     font-family: var(--font-mono);
     font-size: 13px;
-    line-height: 1.16;
+    line-height: 1.18;
     letter-spacing: 0;
     white-space: pre;
     color: var(--text);
+    opacity: 0.26;
+    transform: scale(var(--k, 1));
+    -webkit-mask-image: radial-gradient(135% 105% at 50% 44%, #000 52%, transparent 100%);
+    mask-image: radial-gradient(135% 105% at 50% 44%, #000 52%, transparent 100%);
   }
   .si__grid :global(.e) { color: var(--accent); }
   .si__grid :global(.e2) { color: var(--accent-strong); }
@@ -127,18 +74,59 @@
   .si__grid :global(.bomb) { color: var(--brand-fault); }
   .si__grid :global(.hit) { color: var(--accent-amber); }
 
-  /* game over katmanı */
+  .si__hud {
+    position: absolute;
+    left: var(--gutter);
+    bottom: var(--space-l);
+    margin: 0;
+    font-family: var(--font-mono);
+    font-size: 0.7rem;
+    color: var(--text-faint);
+  }
+  .si__hud [data-statdot] { color: var(--accent-strong); }
+  @media (prefers-reduced-motion: no-preference) {
+    .si__hud [data-statdot] { animation: si-blink 1s steps(1, end) infinite; }
+  }
+  @keyframes si-blink { 50% { opacity: 0.2; } }
+
+  .si__hb,
+  .si__over,
+  .si__pad,
+  .si__x {
+    font-family: var(--font-mono);
+  }
+  .si__hb {
+    position: absolute;
+    inset: 0 0 auto 0;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 0.7rem;
+    height: 1.7rem;
+    border-bottom: 1px solid var(--border);
+    background: color-mix(in srgb, var(--brand-steel) 45%, transparent);
+    font-size: 0.66rem;
+    color: var(--accent-amber);
+    z-index: 2;
+  }
+  .si__x {
+    background: none;
+    border: 0;
+    color: var(--text-muted);
+    font: inherit;
+    cursor: pointer;
+  }
+  .si__x:hover { color: var(--text-strong); }
+
   .si__over {
     position: absolute;
-    inset: 1.6rem 0 0 0;
+    inset: 1.7rem 0 0 0;
     z-index: 3;
     display: grid;
     place-content: center;
     text-align: center;
-    gap: 0.35rem;
-    padding: 1rem;
-    background: color-mix(in srgb, var(--brand-void) 78%, transparent);
-    font-family: var(--font-mono);
+    gap: 0.4rem;
+    background: color-mix(in srgb, var(--brand-void) 80%, transparent);
   }
   .si__over-t { color: var(--brand-fault); font-size: 1rem; }
   .si__over-s { color: var(--text); font-size: 0.85rem; }
@@ -150,7 +138,6 @@
     padding: 0 0.25rem;
   }
 
-  /* mobil kontrol butonları */
   .si__pad {
     position: absolute;
     inset: auto 0 0 0;
@@ -158,11 +145,11 @@
     display: flex;
     justify-content: center;
     gap: 0.5rem;
-    padding: 0.5rem;
+    padding: 0.6rem;
   }
   .si__pad button {
-    width: 3rem;
-    height: 2.4rem;
+    width: 3.2rem;
+    height: 2.6rem;
     border: 1px solid var(--border-strong);
     border-radius: var(--radius);
     background: color-mix(in srgb, var(--brand-steel) 70%, transparent);
@@ -177,58 +164,6 @@
     color: var(--accent);
   }
 
-  .si__close {
-    position: absolute;
-    top: 0.2rem;
-    right: 0.35rem;
-    z-index: 4;
-    background: none;
-    border: 0;
-    color: var(--text-muted);
-    font-size: 1rem;
-    line-height: 1;
-    cursor: pointer;
-  }
-  .si__close:hover { color: var(--text-strong); }
-
-  .si__hud {
-    position: absolute;
-    left: var(--gutter);
-    bottom: var(--space-l);
-    display: flex;
-    flex-direction: column;
-    gap: 0.15rem;
-    font-family: var(--font-mono);
-    font-size: 0.72rem;
-    color: var(--text-faint);
-  }
-  .si__hud b {
-    color: var(--accent-amber);
-    display: inline-block;
-    width: 3.6rem;
-    font-weight: var(--weight-normal);
-  }
-  .si__hud i { font-style: normal; color: var(--text-muted); }
-  .si__stat {
-    margin-top: 0.25rem;
-    padding-top: 0.3rem;
-    border-top: 1px solid var(--border);
-    width: 9rem;
-  }
-  .si__stat > i {
-    display: inline-block;
-    width: 0.5rem;
-    height: 0.5rem;
-    border-radius: 50%;
-    background: var(--accent-strong);
-    margin-right: 0.4rem;
-    vertical-align: middle;
-  }
-  @media (prefers-reduced-motion: no-preference) {
-    .si__stat > i { animation: si-blink 1s steps(1, end) infinite; }
-  }
-  @keyframes si-blink { 50% { opacity: 0.15; } }
-
   .si__backdrop {
     position: fixed;
     inset: 0;
@@ -238,79 +173,70 @@
     cursor: pointer;
   }
 
-  /* --- OYUN MODU: panel modal olur --- */
+  /* --- OYUN MODU --- */
   .si--playing {
     z-index: var(--z-nav-overlay);
   }
-  .si--playing .si__backdrop {
-    z-index: 1;
-  }
-  .si--playing .si__screen {
+  .si--playing .si__backdrop { z-index: 1; }
+  .si--playing .si__stage {
     position: fixed;
     inset: 0;
     margin: auto;
-    transform: none;
     z-index: 2;
-    width: min(94vw, 620px);
-    height: min(80vh, 520px);
-    opacity: 1;
-    cursor: default;
-    border-color: var(--border-strong);
+    width: min(94vw, 600px);
+    height: min(80vh, 500px);
+    border: 1px solid var(--border-strong);
+    border-radius: var(--radius);
+    background: color-mix(in srgb, var(--brand-void) 96%, transparent);
     box-shadow: 0 0 0 1px var(--border-strong), 0 30px 80px -20px #000;
+    pointer-events: auto;
+    place-items: center;
   }
-  .si--playing .si__grid { color: color-mix(in srgb, var(--text) 88%, var(--brand-void)); }
-  .si--playing .si__close { display: block; }
+  .si--playing .si__grid {
+    opacity: 1;
+    color: color-mix(in srgb, var(--text) 92%, var(--brand-void));
+    mask-image: none;
+    -webkit-mask-image: none;
+    margin-top: 0.85rem;
+  }
   .si--playing .si__hud { display: none; }
-  .si--playing .si__play { display: none; }
 
-  /* masaüstü ambient: paneli içerik kolonunun sağ kenarına hizala */
-  @media (min-width: 62rem) {
-    .si:not(.si--playing) .si__screen {
-      left: auto;
-      top: 50%;
-      right: calc(50% - var(--container) / 2 - 0.5rem);
-      transform: translateY(-50%);
-      width: min(34vw, 380px);
-      height: min(30vw, 330px);
-      opacity: 0.85;
-    }
+  @media (pointer: fine) {
+    .si--playing .si__pad { display: none !important; }
   }
   @media (max-width: 48rem) {
     .si:not(.si--playing) .si__hud { display: none; }
-  }
-  @media (pointer: fine) {
-    .si--playing .si__pad { display: none !important; }
   }
 </style>
 
 <script>
   const root = document.querySelector<HTMLElement>('[data-si-root]');
   const el = document.querySelector<HTMLPreElement>('[data-si]');
-  const screen = document.querySelector<HTMLElement>('[data-screen]');
+  const stage = document.querySelector<HTMLElement>('[data-stage]');
 
-  if (root && el && screen) {
-    const grid: HTMLPreElement = el;
-    const rootEl: HTMLElement = root;
-    const screenEl: HTMLElement = screen;
+  if (root && el && stage) {
+    const rootEl = root;
+    const grid = el;
+    const stageEl = stage;
+
     const waveOut = document.querySelector<HTMLElement>('[data-wave]');
-    const enemiesOut = document.querySelector<HTMLElement>('[data-enemies]');
     const scoreOut = document.querySelector<HTMLElement>('[data-score]');
     const statLabel = document.querySelector<HTMLElement>('[data-statlabel]');
     const over = document.querySelector<HTMLElement>('[data-over]');
     const overTitle = document.querySelector<HTMLElement>('[data-over-title]');
     const overScore = document.querySelector<HTMLElement>('[data-over-score]');
     const pad = document.querySelector<HTMLElement>('[data-pad]');
+    const hb = document.querySelector<HTMLElement>('[data-hb]');
     const backdrop = document.querySelector<HTMLElement>('[data-backdrop]');
     const closeBtn = document.querySelector<HTMLElement>('[data-close]');
-    const playBtn = document.querySelector<HTMLElement>('[data-play]');
 
     const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-    const COLS = 26;
-    const ROWS = 14;
+    const COLS = 40;
+    const ROWS = 16;
     const GUN_ROW = ROWS - 1;
-    const EN_COLS = 5;
-    const EN_ROWS = 3;
+    const EN_COLS = 8;
+    const EN_ROWS = 4;
     const GAP_X = 4;
     const GAP_Y = 2;
     const FRAMES = [
@@ -342,7 +268,7 @@
 
     function spawn() {
       alive = Array.from({ length: EN_ROWS }, () => Array(EN_COLS).fill(true));
-      fleet = { x: 2, y: 1, dir: 1 };
+      fleet = { x: 3, y: 1, dir: 1 };
       shots = [];
       bombs = [];
     }
@@ -377,14 +303,12 @@
         cooldown = mode === 'play' ? 2 : 3;
       }
     }
-
     function loseLife() {
       lives--;
       flash = 4;
       bombs = [];
       if (lives <= 0) endGame();
     }
-
     function endGame() {
       mode = 'over';
       if (score > highScore) {
@@ -402,27 +326,14 @@
       if (flash > 0) flash--;
 
       const n = countAlive();
-      if (n === 0) {
-        wave++;
-        score += 100;
-        spawn();
-        return;
+      if (n === 0) { wave++; score += 100; spawn(); return; }
+
+      if (bounds().maxY >= GUN_ROW - 1) {
+        if (mode === 'play') { loseLife(); if (isOver()) return; spawn(); }
+        else { spawn(); return; }
       }
 
-      const reachedBottom = bounds().maxY >= GUN_ROW - 1;
-      if (reachedBottom) {
-        if (mode === 'play') {
-          loseLife();
-          if (isOver()) return;
-          spawn();
-        } else {
-          spawn();
-          return;
-        }
-      }
-
-      // fleet
-      const moveEvery = Math.max(1, Math.round(n / 5) + (mode === 'play' ? 1 : 0));
+      const moveEvery = Math.max(1, Math.round(n / 6) + (mode === 'play' ? 1 : 0));
       if (tick % moveEvery === 0) {
         const b = bounds();
         if ((fleet.dir > 0 && b.max >= COLS - 1) || (fleet.dir < 0 && b.min <= 0)) {
@@ -433,23 +344,18 @@
         }
       }
 
-      // cannon
       if (mode === 'play') {
         if (input.left) gun.x--;
         if (input.right) gun.x++;
         gun.x = Math.max(0, Math.min(COLS - 3, gun.x));
         if (input.fire) tryFire();
       } else {
-        let targetX = gun.x;
-        let best = Infinity;
+        let targetX = gun.x, best = Infinity;
         for (let c = 0; c < EN_COLS; c++)
           for (let r = EN_ROWS - 1; r >= 0; r--)
             if (alive[r][c]) {
               const ex = enemyX(c) + 1;
-              if (Math.abs(ex - (gun.x + 1)) < best) {
-                best = Math.abs(ex - (gun.x + 1));
-                targetX = ex - 1;
-              }
+              if (Math.abs(ex - (gun.x + 1)) < best) { best = Math.abs(ex - (gun.x + 1)); targetX = ex - 1; }
               break;
             }
         gun.x += Math.sign(targetX - gun.x);
@@ -457,7 +363,6 @@
         if (best < 2) tryFire();
       }
 
-      // shots
       shots = shots.filter((s) => {
         s.y -= 1;
         if (s.y < 0) return false;
@@ -475,7 +380,6 @@
         return true;
       });
 
-      // bombs
       const bombChance = mode === 'play' ? 0.14 : 0.06;
       if (Math.random() < bombChance && bombs.length < (mode === 'play' ? 4 : 2)) {
         const cols: number[] = [];
@@ -508,6 +412,17 @@
         cls[r][c] = k;
       };
 
+      // ambient: boş hücrelere seyrek "veri" dokusu (statik karede bile dolu görünür)
+      if (mode === 'ambient') {
+        const NOISE = '.:-';
+        for (let i = 0; i < ROWS * COLS; i++) {
+          const rr = (i / COLS) | 0;
+          const cc = i % COLS;
+          const v = Math.sin(cc * 12.9898 + rr * 78.233 + tick * 0.05) * 43758.5453;
+          if (v - Math.floor(v) > 0.972) buf[rr][cc] = NOISE[(cc + rr) % NOISE.length];
+        }
+      }
+
       const shape = FRAMES[tick % 2];
       for (let r = 0; r < EN_ROWS; r++)
         for (let c = 0; c < EN_COLS; c++) {
@@ -535,19 +450,25 @@
       }
       grid.innerHTML = html;
 
-      if (waveOut) waveOut.textContent = mode === 'play' ? `wave ${wave} · ♥${Math.max(lives, 0)}` : `wave ${wave}`;
-      if (enemiesOut) enemiesOut.textContent = String(countAlive());
+      if (waveOut) waveOut.textContent = `wave ${wave} · ♥${Math.max(lives, 0)} · ${score}`;
       if (scoreOut) scoreOut.textContent = String(score);
       if (statLabel) statLabel.textContent = mode === 'ambient' ? 'simulating' : 'live';
     }
 
-    // --- fit ---
+    // --- fit: ambient = hero'nun büyük kısmını doldur; play = çerçeveye sığdır ---
     function fit() {
       grid.style.setProperty('--k', '1');
-      const availW = screenEl.clientWidth - 14;
-      const availH = screenEl.clientHeight - 30;
-      const k = Math.min(availW / grid.offsetWidth, availH / grid.offsetHeight, 2.2);
-      grid.style.setProperty('--k', String(Math.max(0.4, k)));
+      const gw = grid.offsetWidth || 1;
+      const ghh = grid.offsetHeight || 1;
+      let k: number;
+      if (mode === 'ambient') {
+        const w = rootEl.clientWidth * 0.94;
+        const h = rootEl.clientHeight * 0.88;
+        k = Math.min(w / gw, h / ghh, 3.6);
+      } else {
+        k = Math.min((stageEl.clientWidth - 24) / gw, (stageEl.clientHeight - 40) / ghh, 2.2);
+      }
+      grid.style.setProperty('--k', String(Math.max(0.5, k)));
     }
     let fitTimer = 0;
     window.addEventListener('resize', () => {
@@ -562,22 +483,26 @@
       resetGame();
       rootEl.classList.add('si--playing');
       backdrop?.removeAttribute('hidden');
-      closeBtn?.removeAttribute('hidden');
-      over?.setAttribute('hidden', '');
+      hb?.removeAttribute('hidden');
       pad?.removeAttribute('hidden');
+      over?.setAttribute('hidden', '');
       document.documentElement.style.overflow = 'hidden';
-      requestAnimationFrame(() => { fit(); screenEl.focus(); });
+      if (!loopRunning) startLoop();
+      fit();
+      setTimeout(fit, 60);
+      requestAnimationFrame(() => { fit(); stageEl.focus?.(); });
     }
     function exitPlay() {
       mode = 'ambient';
       rootEl.classList.remove('si--playing');
       backdrop?.setAttribute('hidden', '');
-      closeBtn?.setAttribute('hidden', '');
+      hb?.setAttribute('hidden', '');
       pad?.setAttribute('hidden', '');
       over?.setAttribute('hidden', '');
       document.documentElement.style.overflow = '';
       spawn();
-      requestAnimationFrame(fit);
+      fit();
+      setTimeout(fit, 60);
     }
     function retry() {
       mode = 'play';
@@ -585,21 +510,25 @@
       over?.setAttribute('hidden', '');
     }
 
-    screenEl.addEventListener('click', (e) => {
-      if (mode === 'ambient' && !(e.target as HTMLElement).closest('[data-close]')) enterPlay();
-    });
-    playBtn?.addEventListener('click', (e) => { e.stopPropagation(); enterPlay(); });
+    // dış tetikleyiciler: [data-si-play] tıklaması + "P" tuşu
+    document.querySelectorAll<HTMLElement>('[data-si-play]').forEach((b) =>
+      b.addEventListener('click', (e) => { e.preventDefault(); enterPlay(); }),
+    );
     closeBtn?.addEventListener('click', (e) => { e.stopPropagation(); exitPlay(); });
     backdrop?.addEventListener('click', exitPlay);
+    over?.addEventListener('click', () => { if (mode === 'over') retry(); });
 
-    // klavye
     const KEYMAP: Record<string, 'left' | 'right' | 'fire'> = {
       ArrowLeft: 'left', a: 'left', A: 'left',
       ArrowRight: 'right', d: 'right', D: 'right',
       ArrowUp: 'fire', ' ': 'fire', w: 'fire', W: 'fire',
     };
     window.addEventListener('keydown', (e) => {
-      if (mode === 'ambient') return;
+      const tag = (e.target as HTMLElement)?.tagName;
+      if (mode === 'ambient') {
+        if ((e.key === 'p' || e.key === 'P') && tag !== 'INPUT' && tag !== 'TEXTAREA') enterPlay();
+        return;
+      }
       if (e.key === 'Escape') { exitPlay(); return; }
       if (mode === 'over' && (e.key === ' ' || e.key === 'Enter')) { e.preventDefault(); retry(); return; }
       const a = KEYMAP[e.key];
@@ -610,29 +539,24 @@
       if (a) input[a] = false;
     });
 
-    // dokunmatik pad
     pad?.querySelectorAll<HTMLElement>('[data-btn]').forEach((btn) => {
       const key = btn.dataset.btn as 'left' | 'right' | 'fire';
-      const on = (v: boolean) => (e: Event) => {
+      const set = (v: boolean) => (e: Event) => {
         e.preventDefault();
         if (mode === 'over' && v) { retry(); return; }
         input[key] = v;
       };
-      btn.addEventListener('pointerdown', on(true));
-      btn.addEventListener('pointerup', on(false));
-      btn.addEventListener('pointerleave', on(false));
-      btn.addEventListener('pointercancel', on(false));
+      btn.addEventListener('pointerdown', set(true));
+      btn.addEventListener('pointerup', set(false));
+      btn.addEventListener('pointerleave', set(false));
+      btn.addEventListener('pointercancel', set(false));
     });
-    over?.addEventListener('click', () => { if (mode === 'over') retry(); });
 
     // --- döngü ---
-    render();
-    fit();
-    document.fonts?.ready.then(fit);
-
+    let loopRunning = false;
     let last = 0;
     function loop(ts: number) {
-      const interval = mode === 'ambient' ? 140 : 55;
+      const interval = mode === 'ambient' ? 150 : 55;
       if (ts - last > interval) {
         last = ts;
         if (mode !== 'over') step();
@@ -641,13 +565,14 @@
       if (!document.hidden) requestAnimationFrame(loop);
       else setTimeout(() => requestAnimationFrame(loop), 500);
     }
-    if (!reduce) requestAnimationFrame(loop);
-    else {
-      // reduced-motion: ambient statik; ama oynanınca döngüyü başlat
-      screenEl.addEventListener('click', function once() {
-        screenEl.removeEventListener('click', once);
-        requestAnimationFrame(loop);
-      });
+    function startLoop() {
+      loopRunning = true;
+      requestAnimationFrame(loop);
     }
+
+    render();
+    fit();
+    document.fonts?.ready.then(fit);
+    if (!reduce) startLoop();
   }
 </script>
