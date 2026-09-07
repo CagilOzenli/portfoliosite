@@ -111,6 +111,36 @@ export default defineType({
       description: 'YouTube / Vimeo vb. bağlantıları.',
     }),
 
+    // --- Öne çıkan YouTube videosu + mimari notu (opsiyonel) ---
+    defineField({
+      name: 'youtubeVideoId',
+      title: 'YouTube video ID',
+      type: 'string',
+      group: 'media',
+      description:
+        'Sadece video ID (ör. dQw4w9WgXcQ) — tam URL değil. Doluysa case study sayfasında gömülü oynatıcı çıkar.',
+    }),
+    defineField({
+      name: 'architectureNote',
+      title: 'Architecture note',
+      type: 'text',
+      rows: 3,
+      group: 'media',
+      description:
+        'Videonun altında ayrı bir blok olarak gösterilir. 2-3 cümle: hangi pattern kullanıldı, neden, hangi sorunu çözdü.',
+    }),
+
+    // --- Kod akışı (opsiyonel) ---
+    defineField({
+      name: 'codeFlowSteps',
+      title: 'Code flow',
+      type: 'array',
+      of: [{ type: 'codeFlowStep' }],
+      group: 'media',
+      description:
+        'Sıralı adımlar (screenshot + başlık + açıklama). Case study sayfasında dikey akış görünümünde listelenir.',
+    }),
+
     // --- Bağlantılar ---
     defineField({ name: 'repoLink', title: 'Repository link', type: 'url', group: 'links' }),
     defineField({ name: 'buildLink', title: 'Playable build link', type: 'url', group: 'links' }),

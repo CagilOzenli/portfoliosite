@@ -206,8 +206,13 @@
   }
   @media (max-width: 48rem) {
     .si:not(.si--playing) .si__hud { display: none; }
-    /* mobilde metinle daha az boğuşsun */
-    .si:not(.si--playing) .si__grid { opacity: 0.15; }
+    /* Mobilde: biraz daha görünür + kenarlardan daha yumuşak sönsün
+       (metin okunurluğu için opaklık düşük kalıyor). */
+    .si:not(.si--playing) .si__grid {
+      opacity: 0.24;
+      -webkit-mask-image: radial-gradient(150% 120% at 50% 40%, #000 45%, transparent 100%);
+      mask-image: radial-gradient(150% 120% at 50% 40%, #000 45%, transparent 100%);
+    }
   }
 </style>
 
@@ -464,9 +469,12 @@
       const ghh = grid.offsetHeight || 1;
       let k: number;
       if (mode === 'ambient') {
-        const w = rootEl.clientWidth * 0.94;
-        const h = rootEl.clientHeight * 0.88;
-        k = Math.min(w / gw, h / ghh, 3.6);
+        // Dar ekranda formasyon kenarlardan biraz taşabilir (mask söndürür) —
+        // böylece invader'lar yeterince büyük görünür.
+        const narrow = window.matchMedia('(max-width: 48rem)').matches;
+        const w = rootEl.clientWidth * (narrow ? 1.5 : 0.94);
+        const h = rootEl.clientHeight * (narrow ? 0.95 : 0.88);
+        k = Math.min(w / gw, h / ghh, narrow ? 4.5 : 3.6);
       } else {
         k = Math.min((stageEl.clientWidth - 24) / gw, (stageEl.clientHeight - 40) / ghh, 2.2);
       }

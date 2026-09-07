@@ -94,6 +94,36 @@ export default defineType({
     defineField({ name: 'video', title: 'Video link', type: 'url', group: 'media' }),
     defineField({ name: 'githubLink', title: 'GitHub link', type: 'url', group: 'media' }),
 
+    // --- Öne çıkan YouTube videosu + mimari notu (opsiyonel) ---
+    defineField({
+      name: 'youtubeVideoId',
+      title: 'YouTube video ID',
+      type: 'string',
+      group: 'media',
+      description:
+        'Sadece video ID (ör. dQw4w9WgXcQ) — tam URL değil. Doluysa detay sayfasında gömülü oynatıcı çıkar.',
+    }),
+    defineField({
+      name: 'architectureNote',
+      title: 'Architecture note',
+      type: 'text',
+      rows: 3,
+      group: 'media',
+      description:
+        'Videonun altında ayrı bir blok. 2-3 cümle: hangi pattern, neden, hangi sorunu çözdü.',
+    }),
+
+    // --- Kod akışı (opsiyonel) ---
+    defineField({
+      name: 'codeFlowSteps',
+      title: 'Code flow',
+      type: 'array',
+      of: [{ type: 'codeFlowStep' }],
+      group: 'media',
+      description:
+        'Sıralı adımlar (screenshot + başlık + açıklama). Detay sayfasında dikey akış görünümünde listelenir.',
+    }),
+
     // --- Publishing ---
     defineField({
       name: 'published',

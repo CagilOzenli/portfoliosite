@@ -79,6 +79,14 @@ export interface Seo {
   ogImage?: SanityImage;
 }
 
+/** Bir kod akışı adımı (project & systemsLabEntry içindeki codeFlowSteps[]). */
+export interface CodeFlowStep {
+  order?: number;
+  stepTitle: string;
+  explanation?: string;
+  screenshot?: SanityImage;
+}
+
 export interface Project {
   _id: string;
   name: string;
@@ -102,6 +110,9 @@ export interface Project {
   repoLink?: string;
   buildLink?: string;
   externalLink?: string;
+  youtubeVideoId?: string;
+  architectureNote?: string;
+  codeFlowSteps?: CodeFlowStep[];
   featured?: boolean;
   published?: boolean;
   order?: number;
@@ -124,6 +135,9 @@ export interface SystemsLabEntry {
   gif?: SanityImage;
   video?: string;
   githubLink?: string;
+  youtubeVideoId?: string;
+  architectureNote?: string;
+  codeFlowSteps?: CodeFlowStep[];
   visible?: boolean;
   published?: boolean;
   order?: number;

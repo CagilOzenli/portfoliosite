@@ -1,0 +1,123 @@
+---
+/**
+ * Kod akışı — sıralı adımların dikey zaman çizelgesi/akış görünümü.
+ * Her adım: numara + stepTitle + screenshot + explanation.
+ * `order` alanına göre sıralanır; order yoksa CMS sırası korunur.
+ */
+import { thumbUrl, imageAlt } from '../lib/image';
+import type { CodeFlowStep } from '../lib/types';
+
+interface Props {
+  steps?: CodeFlowStep[];
+}
+const { steps = [] } = Astro.props;
+
+const ordered = [...steps]
+  .filter((s) => s && s.stepTitle)
+  .sort((a, b) => (a.order ?? 999) - (b.order ?? 999));
+---
+
+{
+  ordered.length > 0 && (
+    <ol class="flow">
+      {ordered.map((step, i) => {
+        const img = thumbUrl(step.screenshot, 1400, 0);
+        return (
+          <li class="flow__step">
+            <div class="flow__marker" aria-hidden="true">
+              <span class="flow__num">{String(i + 1).padStart(2, '0')}</span>
+              <span class="flow__line" />
+            </div>
+            <div class="flow__body">
+              <h3 class="flow__title">{step.stepTitle}</h3>
+              {img && (
+                <img
+                  class="flow__shot"
+                  src={img}
+                  alt={imageAlt(step.screenshot, step.stepTitle)}
+                  loading="lazy"
+                  decoding="async"
+                />
+              )}
+              {step.explanation?.trim() && (
+                <p class="flow__text">{step.explanation}</p>
+              )}
+            </div>
+          </li>
+        );
+      })}
+    </ol>
+  )
+}
+
+<style>
+  .flow {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-l);
+  }
+  .flow__step {
+    display: grid;
+    grid-template-columns: 2.5rem 1fr;
+    gap: var(--space-m);
+  }
+
+  .flow__marker {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+  .flow__num {
+    font-family: var(--font-mono);
+    font-size: var(--text--1);
+    color: var(--accent-amber);
+    line-height: 1.4;
+  }
+  .flow__line {
+    flex: 1;
+    width: 1px;
+    margin-top: 0.35rem;
+    background: var(--border);
+  }
+  .flow__step:last-child .flow__line {
+    display: none;
+  }
+
+  .flow__body {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-s);
+    padding-bottom: var(--space-xs);
+    min-width: 0;
+  }
+  .flow__title {
+    font-family: var(--font-mono);
+    font-size: var(--text-0);
+    font-weight: var(--weight-normal);
+    color: var(--text-strong);
+  }
+  .flow__shot {
+    width: 100%;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    background: var(--bg-elevated);
+  }
+  .flow__text {
+    font-family: var(--font-mono);
+    font-size: var(--text--1);
+    line-height: 1.65;
+    color: var(--text-muted);
+    max-width: 64ch;
+    white-space: pre-line;
+  }
+
+  @media (max-width: 30rem) {
+    .flow__step {
+      grid-template-columns: 1.75rem 1fr;
+      gap: var(--space-s);
+    }
+  }
+</style>

@@ -1,0 +1,46 @@
+---
+/**
+ * "Mimari notu" — videonun altında görsel olarak hafifçe farklılaştırılmış
+ * bir blok. Hangi pattern kullanıldı, neden, hangi sorunu çözdü.
+ */
+interface Props {
+  text?: string | null;
+}
+const { text } = Astro.props;
+const body = (text ?? '').trim();
+---
+
+{
+  body && (
+    <aside class="arch">
+      <span class="arch__label">// architecture</span>
+      <p class="arch__body">{body}</p>
+    </aside>
+  )
+}
+
+<style>
+  .arch {
+    margin: 0;
+    padding: var(--space-s) var(--space-m);
+    border-left: 2px solid var(--accent-amber);
+    background: color-mix(in srgb, var(--bg-elevated) 55%, transparent);
+    border-radius: 0 var(--radius) var(--radius) 0;
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2xs);
+  }
+  .arch__label {
+    font-family: var(--font-mono);
+    font-size: var(--text--1);
+    color: var(--accent-amber);
+  }
+  .arch__body {
+    font-family: var(--font-mono);
+    font-size: var(--text-0);
+    line-height: 1.6;
+    color: var(--text-muted);
+    max-width: 64ch;
+    white-space: pre-line;
+  }
+</style>

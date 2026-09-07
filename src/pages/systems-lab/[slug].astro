@@ -3,6 +3,9 @@ import BaseLayout from '../../layouts/BaseLayout.astro';
 import Prose from '../../components/Prose.astro';
 import Figures from '../../components/Figures.astro';
 import VideoEmbed from '../../components/VideoEmbed.astro';
+import YouTubeEmbed from '../../components/YouTubeEmbed.astro';
+import ArchitectureNote from '../../components/ArchitectureNote.astro';
+import CodeFlow from '../../components/CodeFlow.astro';
 import Icon from '../../components/Icon.astro';
 import { getSystemsLabSlugs, getSystemsLabEntryBySlug } from '../../lib/content';
 
@@ -94,6 +97,25 @@ const sections: { title: string; text?: string }[] = [
     {
       entry.gif?.asset && (
         <Figures images={[entry.gif]} label="Clip" />
+      )
+    }
+
+    {
+      entry.youtubeVideoId && (
+        <section class="cs__section">
+          <h2>Video walkthrough</h2>
+          <YouTubeEmbed videoId={entry.youtubeVideoId} title={entry.title} />
+          <ArchitectureNote text={entry.architectureNote} />
+        </section>
+      )
+    }
+
+    {
+      entry.codeFlowSteps && entry.codeFlowSteps.length > 0 && (
+        <section class="cs__section">
+          <h2>Code flow</h2>
+          <CodeFlow steps={entry.codeFlowSteps} />
+        </section>
       )
     }
 

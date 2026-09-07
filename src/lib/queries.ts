@@ -82,6 +82,8 @@ export const PROJECT_BY_SLUG_QUERY = /* groq */ `
   responsibilities, systemsImplemented, technicalChallenges, solutions, lessonsLearned,
   screenshots, gifs, videos,
   repoLink, buildLink, externalLink,
+  youtubeVideoId, architectureNote,
+  codeFlowSteps[]{ order, stepTitle, explanation, screenshot },
   seo
 }`;
 
@@ -112,5 +114,7 @@ export const SYSTEMS_LAB_BY_SLUG_QUERY = /* groq */ `
   engine, tools,
   "relatedProject": relatedProject->{ name, "slug": slug.current },
   contribution, challenge, solution,
-  blueprintScreenshots, gif, video, githubLink
+  blueprintScreenshots, gif, video, githubLink,
+  youtubeVideoId, architectureNote,
+  codeFlowSteps[]{ order, stepTitle, explanation, screenshot }
 }`;

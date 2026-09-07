@@ -2,6 +2,7 @@ import type { SchemaTypeDefinition } from 'sanity';
 
 // Ortak object'ler
 import seo from './objects/seo';
+import codeFlowStep from './objects/codeFlowStep';
 
 // Tekil (singleton) sayfalar
 import siteSettings from './singletons/siteSettings';
@@ -16,6 +17,7 @@ import systemsLabEntry from './documents/systemsLabEntry';
 
 export const schemaTypes: SchemaTypeDefinition[] = [
   seo,
+  codeFlowStep,
   siteSettings,
   hero,
   about,

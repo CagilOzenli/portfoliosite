@@ -3,6 +3,9 @@ import BaseLayout from '../../layouts/BaseLayout.astro';
 import Prose from '../../components/Prose.astro';
 import Figures from '../../components/Figures.astro';
 import VideoEmbed from '../../components/VideoEmbed.astro';
+import YouTubeEmbed from '../../components/YouTubeEmbed.astro';
+import ArchitectureNote from '../../components/ArchitectureNote.astro';
+import CodeFlow from '../../components/CodeFlow.astro';
 import Icon from '../../components/Icon.astro';
 import { getProjectSlugs, getProjectBySlug } from '../../lib/content';
 import { thumbUrl, imageAlt } from '../../lib/image';
@@ -129,6 +132,25 @@ const videos = (project.videos ?? []).filter(Boolean);
 
     <Figures images={project.screenshots} label="Screenshots" />
     <Figures images={project.gifs} label="Clips" />
+
+    {
+      project.youtubeVideoId && (
+        <section class="cs__section">
+          <h2>Video walkthrough</h2>
+          <YouTubeEmbed videoId={project.youtubeVideoId} title={project.name} />
+          <ArchitectureNote text={project.architectureNote} />
+        </section>
+      )
+    }
+
+    {
+      project.codeFlowSteps && project.codeFlowSteps.length > 0 && (
+        <section class="cs__section">
+          <h2>Code flow</h2>
+          <CodeFlow steps={project.codeFlowSteps} />
+        </section>
+      )
+    }
 
     {
       videos.length > 0 && (
