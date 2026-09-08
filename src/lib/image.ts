@@ -32,6 +32,23 @@ export function thumbUrl(
   return img.url();
 }
 
+/**
+ * YouTube video ID -> kapak görseli URL'i.
+ * `maxresdefault` (1280×720, 16:9, siyah bant yok) dener; yüklenmezse
+ * çağıran taraf `youtubeThumbFallback` (hqdefault, her zaman var) ile onerror
+ * fallback yapmalı.
+ */
+export function youtubeThumb(id: string | undefined | null): string | null {
+  const v = (id ?? '').trim();
+  return v ? `https://i.ytimg.com/vi/${v}/maxresdefault.jpg` : null;
+}
+
+/** Her zaman var olan düşük çözünürlüklü YouTube kapağı (4:3, hafif siyah bant). */
+export function youtubeThumbFallback(id: string | undefined | null): string | null {
+  const v = (id ?? '').trim();
+  return v ? `https://i.ytimg.com/vi/${v}/hqdefault.jpg` : null;
+}
+
 /** Görselin alt metni (CMS'te doldurulmuşsa) */
 export function imageAlt(source: SanityImage | undefined | null, fallback = ''): string {
   return source?.alt?.trim() || fallback;

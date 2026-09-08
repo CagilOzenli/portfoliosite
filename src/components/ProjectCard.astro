@@ -7,7 +7,7 @@
  */
 import Icon from './Icon.astro';
 import ThumbPlaceholder from './ThumbPlaceholder.astro';
-import { thumbUrl, imageAlt } from '../lib/image';
+import { thumbUrl, imageAlt, youtubeThumb, youtubeThumbFallback } from '../lib/image';
 import { STATUS_LABEL, type Project } from '../lib/types';
 
 interface Props {
@@ -23,7 +23,11 @@ const label = project
   : placeholderLabel ?? 'GAME PROJECT';
 
 const href = project ? `/work/${project.slug}` : null;
-const cover = project ? thumbUrl(project.coverImage, 1280, 800) : null;
+// Kapak görseli: önce CMS'teki coverImage; yoksa YouTube video kapağı.
+const cover = project
+  ? thumbUrl(project.coverImage, 1280, 800) ?? youtubeThumb(project.youtubeVideoId)
+  : null;
+const coverFallback = project?.coverImage ? null : youtubeThumbFallback(project?.youtubeVideoId);
 ---
 
 <article class:list={['pcard', { 'pcard--placeholder': isPlaceholder }]}>
@@ -31,7 +35,15 @@ const cover = project ? thumbUrl(project.coverImage, 1280, 800) : null;
     href ? (
       <a class="pcard__media" href={href} aria-label={`${project!.name} — case study`}>
         {cover ? (
-          <img src={cover} alt={imageAlt(project!.coverImage, project!.name)} loading="lazy" decoding="async" width="1280" height="800" />
+          <img
+            src={cover}
+            alt={imageAlt(project!.coverImage, project!.name)}
+            loading="lazy"
+            decoding="async"
+            width="1280"
+            height="800"
+            onerror={coverFallback ? `this.onerror=null;this.src='${coverFallback}'` : undefined}
+          />
         ) : (
           <ThumbPlaceholder label="no cover yet" />
         )}

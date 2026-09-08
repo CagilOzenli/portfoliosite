@@ -52,6 +52,7 @@ const PROJECT_CARD_FIELDS = /* groq */ `
   name,
   "slug": slug.current,
   coverImage,
+  youtubeVideoId,
   shortDescription,
   genre,
   status,
