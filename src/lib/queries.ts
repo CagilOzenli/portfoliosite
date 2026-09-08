@@ -57,18 +57,18 @@ const PROJECT_CARD_FIELDS = /* groq */ `
   genre,
   status,
   featured,
-  order
+  orderRank
 `;
 
 export const FEATURED_PROJECTS_QUERY = /* groq */ `
 *[_type == "project" && published == true && featured == true]
-  | order(order asc, name asc)[0...2]{
+  | order(orderRank)[0...4]{
   ${PROJECT_CARD_FIELDS}
 }`;
 
 export const ALL_PROJECTS_QUERY = /* groq */ `
 *[_type == "project" && published == true]
-  | order(order asc, name asc){
+  | order(orderRank){
   ${PROJECT_CARD_FIELDS}
 }`;
 

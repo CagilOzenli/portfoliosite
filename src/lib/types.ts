@@ -115,7 +115,7 @@ export interface Project {
   codeFlowSteps?: CodeFlowStep[];
   featured?: boolean;
   published?: boolean;
-  order?: number;
+  orderRank?: string;
   seo?: Seo;
 }
 

@@ -10,7 +10,6 @@ import Icon from '../components/Icon.astro';
 import {
   getFeaturedProjects,
   getSystemsLabEntries,
-  FEATURED_PLACEHOLDERS,
   SYSTEMS_LAB_PLACEHOLDERS,
 } from '../lib/content';
 
@@ -19,8 +18,11 @@ const [featured, systems] = await Promise.all([
   getSystemsLabEntries(),
 ]);
 
-// En fazla 2 featured kart. Gerçek proje yoksa 2 nötr yer tutucu.
-const featuredCards = featured.length > 0 ? featured.slice(0, 2) : [];
+// En fazla 4 featured kart — hepsi gerçek proje. Yoksa bölüm hiç çıkmaz
+// (yer tutucu / "work in progress" görüntüsü yok).
+const featuredCards = featured.slice(0, 4);
+// 3+ kart olduğunda yatay kaydırmalı şeride döner.
+const featuredScroll = featuredCards.length >= 3;
 const systemsPreview = systems.length > 0 ? systems.slice(0, 4) : [];
 ---
 
@@ -31,22 +33,25 @@ const systemsPreview = systems.length > 0 ? systems.slice(0, 4) : [];
     <!-- ABOUT (kısa) — gerçek içerik olduğu için hero'dan hemen sonra -->
     <AboutBlock compact />
 
-    <!-- FEATURED PROJECTS -->
-    <section aria-labelledby="featured-title">
-      <div class="container">
-        <SectionHeading kicker="Selected Work" title="Featured projects" id="featured-title" />
-        <div class="grid-2">
-          {
-            featuredCards.length > 0
-              ? featuredCards.map((p) => <ProjectCard project={p} />)
-              : FEATURED_PLACEHOLDERS.map((ph) => <ProjectCard placeholderLabel={ph.label} />)
-          }
-        </div>
-        <a class="arrow-link section-more" href="/work">
-          All work <Icon name="arrow" size={16} />
-        </a>
-      </div>
-    </section>
+    <!-- FEATURED PROJECTS — sadece gerçek featured proje varsa -->
+    {
+      featuredCards.length > 0 && (
+        <section aria-labelledby="featured-title">
+          <div class="container">
+            <SectionHeading kicker="Selected Work" title="Featured projects" id="featured-title" />
+            <div
+              class:list={['featured-rail', { 'featured-rail--scroll': featuredScroll }]}
+              data-count={featuredCards.length}
+            >
+              {featuredCards.map((p) => <ProjectCard project={p} />)}
+            </div>
+            <a class="arrow-link section-more" href="/work">
+              All work <Icon name="arrow" size={16} />
+            </a>
+          </div>
+        </section>
+      )
+    }
 
     <!-- SYSTEMS LAB -->
     <section aria-labelledby="lab-title">
@@ -75,10 +80,40 @@ const systemsPreview = systems.length > 0 ? systems.slice(0, 4) : [];
 </BaseLayout>
 
 <style>
-  .grid-2 {
+  /* Featured: 1–2 kart sade grid, 3+ kart yatay kaydırmalı şerit */
+  .featured-rail {
     display: grid;
     gap: var(--space-m);
   }
+  .featured-rail[data-count='1'] {
+    max-width: 34rem;
+  }
+
+  .featured-rail--scroll {
+    display: flex;
+    gap: var(--space-m);
+    overflow-x: auto;
+    overscroll-behavior-x: contain;
+    scroll-snap-type: x mandatory;
+    scroll-padding-inline: var(--space-xs);
+    /* kartların viewport kenarına doğru taştığını hissettir */
+    margin-inline: calc(-1 * var(--space-xs));
+    padding: var(--space-3xs) var(--space-xs) var(--space-s);
+    scrollbar-width: thin;
+    scrollbar-color: var(--border-strong) transparent;
+  }
+  .featured-rail--scroll > :global(.pcard) {
+    flex: 0 0 min(82%, 21rem);
+    scroll-snap-align: start;
+  }
+  .featured-rail--scroll::-webkit-scrollbar {
+    height: 6px;
+  }
+  .featured-rail--scroll::-webkit-scrollbar-thumb {
+    background: var(--border-strong);
+    border-radius: var(--radius-pill);
+  }
+
   /* Systems Lab: spec gereği mobilde de 2 sütun */
   .grid-systems {
     display: grid;
@@ -91,12 +126,30 @@ const systemsPreview = systems.length > 0 ? systems.slice(0, 4) : [];
   }
 
   @media (min-width: 40rem) {
-    .grid-2 {
-      grid-template-columns: repeat(2, 1fr);
+    .featured-rail {
       gap: var(--space-l);
+    }
+    .featured-rail[data-count='2'] {
+      grid-template-columns: repeat(2, 1fr);
+    }
+    .featured-rail--scroll > :global(.pcard) {
+      flex-basis: 20rem;
     }
     .grid-systems {
       gap: var(--space-m);
+    }
+  }
+
+  @media (min-width: 64rem) {
+    .featured-rail--scroll {
+      margin-inline: 0;
+      padding-inline: 0;
+    }
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    .featured-rail--scroll {
+      scroll-behavior: smooth;
     }
   }
 </style>

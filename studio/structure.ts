@@ -1,4 +1,5 @@
 import type { StructureResolver } from 'sanity/structure';
+import { orderableDocumentListDeskItem } from '@sanity/orderable-document-list';
 import {
   CogIcon,
   RocketIcon,
@@ -26,7 +27,7 @@ export const singletonActions = new Set<string>([
   'unpublish',
 ]);
 
-export const structure: StructureResolver = (S) =>
+export const structure: StructureResolver = (S, context) =>
   S.list()
     .title('Content')
     .items([
@@ -62,15 +63,13 @@ export const structure: StructureResolver = (S) =>
 
       S.divider(),
 
-      S.listItem()
-        .title('Work (Projects)')
-        .icon(ProjectsIcon)
-        .schemaType('project')
-        .child(
-          S.documentTypeList('project')
-            .title('Work (Projects)')
-            .defaultOrdering([{ field: 'order', direction: 'asc' }]),
-        ),
+      orderableDocumentListDeskItem({
+        type: 'project',
+        title: 'Work (Projects)',
+        icon: ProjectsIcon,
+        S,
+        context,
+      }),
 
       S.listItem()
         .title('Systems Lab')

@@ -69,7 +69,7 @@ export const SYSTEMS_LAB_PLACEHOLDERS: { title: string; slug: null }[] = [
   { title: 'UI & Input', slug: null },
 ];
 
-/** Homepage'de featured proje yokken gösterilecek 2 nötr kart etiketi. */
+/** /work sayfasında hiç proje yokken gösterilecek 2 nötr kart etiketi. */
 export const FEATURED_PLACEHOLDERS: { label: string }[] = [
   { label: 'GAME PROJECT' },
   { label: 'PROTOTYPE' },

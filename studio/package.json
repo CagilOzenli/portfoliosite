@@ -12,6 +12,7 @@
   },
   "dependencies": {
     "@sanity/icons": "^3.0.0",
+    "@sanity/orderable-document-list": "^1.5.1",
     "@sanity/vision": "^4.0.0",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",

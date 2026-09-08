@@ -1,5 +1,6 @@
 import { defineType, defineField } from 'sanity';
 import { ProjectsIcon } from '@sanity/icons';
+import { orderRankField, orderRankOrdering } from '@sanity/orderable-document-list';
 
 const imageArray = {
   type: 'array' as const,
@@ -161,7 +162,7 @@ export default defineType({
       type: 'boolean',
       group: 'meta',
       initialValue: false,
-      description: 'Ana sayfada en fazla 2 proje featured olabilir.',
+      description: 'Ana sayfada en fazla 4 proje featured olabilir. 3+ olduğunda yatay kaydırmalı şeride döner.',
       validation: (Rule) =>
         Rule.custom(async (value, context) => {
           if (!value) return true;
@@ -172,28 +173,20 @@ export default defineType({
             `count(*[_type == "project" && featured == true && !(_id in [$id, $draft])])`,
             { id, draft: `drafts.${id}` },
           );
-          return count >= 2
-            ? 'Zaten 2 proje "featured". Önce birinden bu işareti kaldır.'
+          return count >= 4
+            ? 'Zaten 4 proje "featured". Önce birinden bu işareti kaldır.'
             : true;
         }),
     }),
-    defineField({
-      name: 'order',
-      title: 'Order',
-      type: 'number',
-      group: 'meta',
-      description: 'Küçük sayı önce gelir. Listeleri elle sıralamak için.',
-      initialValue: 100,
-    }),
+    // Sürükle-bırak sıralama alanı (Work listesinde). En üstteki proje
+    // sitede de en başta görünür — "yeniden eskiye" için en yeni projeyi
+    // en üste sürükle.
+    { ...orderRankField({ type: 'project' }), group: 'meta' },
     defineField({ name: 'seo', title: 'SEO', type: 'seo', group: 'meta' }),
   ],
 
   orderings: [
-    {
-      title: 'Manual order',
-      name: 'orderAsc',
-      by: [{ field: 'order', direction: 'asc' }],
-    },
+    orderRankOrdering,
     {
       title: 'Name A→Z',
       name: 'nameAsc',

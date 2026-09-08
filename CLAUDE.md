@@ -11,7 +11,8 @@ Full setup & deploy runbook: **`README.md`**.
 - **Design lives in code only.** All colors/sizing in `src/styles/tokens.css`
   (CSS variables). Never hardcode hex in components. CMS controls content, never design.
 - Avoid neon/esports look, purple-blue gradients, heavy glow, desert/post-apoc imagery.
-- Homepage shows **at most 2** featured projects (Sanity validation enforces this).
+- Homepage shows **at most 4** featured projects (Sanity validation enforces this);
+  3+ render as a horizontal scroll-snap rail, 0 hides the section (no placeholders).
 - **Ask before** `git push`, any deploy, or domain/DNS changes. Explain steps clearly.
 
 ## Layout
