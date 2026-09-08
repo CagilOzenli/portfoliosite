@@ -15,6 +15,7 @@ interface Props {
     | 'menu'
     | 'close'
     | 'download'
+    | 'phone'
     | 'gamepad';
   size?: number;
   class?: string;
@@ -32,6 +33,8 @@ const SHAPES: Record<Props['name'], string> = {
     '<path d="M14 4h6v6M20 4l-8.5 8.5M18 14v4a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4"/>',
   mail: '<rect x="3" y="5" width="18" height="14" rx="2"/><path d="m3.5 7 8.5 6 8.5-6"/>',
   download: '<path d="M12 3v12m0 0 4.5-4.5M12 15l-4.5-4.5M5 21h14"/>',
+  phone:
+    '<path d="M6.5 3h3l1.5 5-2.2 1.1a12.5 12.5 0 0 0 6.1 6.1L15 14l5 1.5v3a2 2 0 0 1-2.1 2A16.5 16.5 0 0 1 4.5 5.1 2 2 0 0 1 6.5 3z"/>',
   menu: '<path d="M3 6h18M3 12h18M3 18h18"/>',
   close: '<path d="M6 6l12 12M18 6 6 18"/>',
   play: '<path d="M8 5.14v13.72a1 1 0 0 0 1.5.86l11-6.86a1 1 0 0 0 0-1.72l-11-6.86A1 1 0 0 0 8 5.14z"/>',

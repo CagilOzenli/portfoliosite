@@ -9,19 +9,24 @@ interface Props {
   linkedin?: string;
   github?: string;
   email?: string;
+  phone?: string;
   cvUrl?: string | null;
   variant?: 'row' | 'stack';
   class?: string;
 }
 
-const { linkedin, github, email, cvUrl, variant = 'row', class: className } = Astro.props;
+const { linkedin, github, email, phone, cvUrl, variant = 'row', class: className } = Astro.props;
+
+// tel: linki için sadece rakam / + bırak
+const telHref = phone ? `tel:${phone.replace(/[^\d+]/g, '')}` : null;
 
 const items = [
   linkedin && { label: 'LinkedIn', href: linkedin, icon: 'linkedin' as const, external: true },
   github && { label: 'GitHub', href: github, icon: 'github' as const, external: true },
   email && { label: 'Email', href: `mailto:${email}`, icon: 'mail' as const, external: false },
+  telHref && { label: phone!, href: telHref, icon: 'phone' as const, external: false },
   cvUrl && { label: 'CV', href: cvUrl, icon: 'download' as const, external: true },
-].filter(Boolean) as { label: string; href: string; icon: 'linkedin' | 'github' | 'mail' | 'download'; external: boolean }[];
+].filter(Boolean) as { label: string; href: string; icon: 'linkedin' | 'github' | 'mail' | 'phone' | 'download'; external: boolean }[];
 ---
 
 {
