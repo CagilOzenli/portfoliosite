@@ -4,11 +4,12 @@
  * `entry` yoksa NÖTR yer tutucu (sadece başlık, açıklama uydurma yok).
  */
 import ThumbPlaceholder from './ThumbPlaceholder.astro';
+import YouTubeEmbed from './YouTubeEmbed.astro';
 import Icon from './Icon.astro';
 import { type SystemsLabEntry } from '../lib/types';
 
 interface Props {
-  entry?: Pick<SystemsLabEntry, 'title' | 'slug' | 'summary' | 'engine'>;
+  entry?: Pick<SystemsLabEntry, 'title' | 'slug' | 'summary' | 'engine' | 'youtubeVideoId'>;
   /** entry yokken gösterilecek başlık (sabit kategori adı) */
   placeholderTitle?: string;
 }
@@ -17,16 +18,25 @@ const { entry, placeholderTitle } = Astro.props;
 const title = entry?.title ?? placeholderTitle ?? 'System';
 const href = entry?.slug ? `/systems-lab/${entry.slug}` : null;
 const Tag = href ? 'a' : 'div';
+const videoId = entry?.youtubeVideoId?.trim() || null;
 ---
 
 <article class:list={['scard', { 'scard--off': !href }]}>
-  <Tag
-    class="scard__media"
-    {...href ? { href } : {}}
-    {...href ? { 'aria-label': `${title} — open` } : {}}
-  >
-    <ThumbPlaceholder variant="play" />
-  </Tag>
+  {
+    videoId ? (
+      <div class="scard__media scard__media--video">
+        <YouTubeEmbed videoId={videoId} title={title} />
+      </div>
+    ) : (
+      <Tag
+        class="scard__media"
+        {...href ? { href } : {}}
+        {...href ? { 'aria-label': `${title} — open` } : {}}
+      >
+        <ThumbPlaceholder variant="play" />
+      </Tag>
+    )
+  }
   <div class="scard__foot">
     <h3 class="scard__title">
       {href ? <a href={href}>{title}</a> : <span>{title}</span>}
@@ -56,6 +66,18 @@ const Tag = href ? 'a' : 'div';
   }
   .scard__media {
     display: block;
+  }
+  .scard__media--video {
+    position: relative;
+    aspect-ratio: 16 / 10;
+    overflow: hidden;
+  }
+  .scard__media--video :global(.yt) {
+    position: absolute;
+    inset: 0;
+    aspect-ratio: auto;
+    border: 0;
+    border-radius: 0;
   }
   .scard__foot {
     padding: var(--space-s);

@@ -7,6 +7,7 @@
  */
 import Icon from './Icon.astro';
 import ThumbPlaceholder from './ThumbPlaceholder.astro';
+import YouTubeEmbed from './YouTubeEmbed.astro';
 import { thumbUrl, imageAlt, youtubeThumb, youtubeThumbFallback } from '../lib/image';
 import { STATUS_LABEL, type Project } from '../lib/types';
 
@@ -23,7 +24,9 @@ const label = project
   : placeholderLabel ?? 'GAME PROJECT';
 
 const href = project ? `/work/${project.slug}` : null;
-// Kapak görseli: önce CMS'teki coverImage; yoksa YouTube video kapağı.
+// Video varsa kart medyası yerinde oynatılır; yoksa kapak görseli
+// (CMS coverImage, o da yoksa YouTube kapağı) case study'ye linktir.
+const videoId = project?.youtubeVideoId?.trim() || null;
 const cover = project
   ? thumbUrl(project.coverImage, 1280, 800) ?? youtubeThumb(project.youtubeVideoId)
   : null;
@@ -32,7 +35,11 @@ const coverFallback = project?.coverImage ? null : youtubeThumbFallback(project?
 
 <article class:list={['pcard', { 'pcard--placeholder': isPlaceholder }]}>
   {
-    href ? (
+    videoId ? (
+      <div class="pcard__media pcard__media--video">
+        <YouTubeEmbed videoId={videoId} title={project!.name} />
+      </div>
+    ) : href ? (
       <a class="pcard__media" href={href} aria-label={`${project!.name} — case study`}>
         {cover ? (
           <img
@@ -113,6 +120,18 @@ const coverFallback = project?.coverImage ? null : youtubeThumbFallback(project?
   }
   .pcard:hover .pcard__media img {
     transform: scale(1.03);
+  }
+  /* Video kartı: YouTubeEmbed medya alanını tam kaplasın, kendi
+     kenarlığı/köşesi kartınkiyle çakışmasın. */
+  .pcard__media--video {
+    position: relative;
+  }
+  .pcard__media--video :global(.yt) {
+    position: absolute;
+    inset: 0;
+    aspect-ratio: auto;
+    border: 0;
+    border-radius: 0;
   }
 
   .pcard__strip {

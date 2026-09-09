@@ -29,6 +29,8 @@ const label =
   project.genre?.toUpperCase() ||
   (project.status ? STATUS_LABEL[project.status] : 'GAME PROJECT');
 
+// Video varsa sayfanın en üstünde oynatıcı olur (kapak görseli yerine).
+const videoId = project.youtubeVideoId?.trim() || null;
 // Kapak görseli: CMS'teki coverImage; yoksa YouTube video kapağına düş.
 const cover = thumbUrl(project.coverImage, 1600, 900) ?? youtubeThumb(project.youtubeVideoId);
 const coverFallback = project.coverImage ? null : youtubeThumbFallback(project.youtubeVideoId);
@@ -78,7 +80,12 @@ const videos = (project.videos ?? []).filter(Boolean);
     </header>
 
     {
-      cover ? (
+      videoId ? (
+        <div class="cs__hero-video">
+          <YouTubeEmbed videoId={videoId} title={project.name} />
+          <ArchitectureNote text={project.architectureNote} />
+        </div>
+      ) : cover ? (
         <img
           class="cs__cover"
           src={cover}
@@ -137,16 +144,6 @@ const videos = (project.videos ?? []).filter(Boolean);
     <Figures images={project.gifs} label="Clips" />
 
     {
-      project.youtubeVideoId && (
-        <section class="cs__section">
-          <h2>Video walkthrough</h2>
-          <YouTubeEmbed videoId={project.youtubeVideoId} title={project.name} />
-          <ArchitectureNote text={project.architectureNote} />
-        </section>
-      )
-    }
-
-    {
       project.codeFlowSteps && project.codeFlowSteps.length > 0 && (
         <section class="cs__section">
           <h2>Code flow</h2>
@@ -197,6 +194,14 @@ const videos = (project.videos ?? []).filter(Boolean);
     aspect-ratio: 16 / 9;
     object-fit: cover;
     border: 1px solid var(--border);
+    border-radius: var(--radius-l);
+  }
+  .cs__hero-video {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-s);
+  }
+  .cs__hero-video :global(.yt) {
     border-radius: var(--radius-l);
   }
   .cs__meta {

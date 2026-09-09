@@ -83,6 +83,7 @@ const systemsPreview = systems.length > 0 ? systems.slice(0, 4) : [];
   /* Featured: 1–2 kart sade grid, 3+ kart yatay kaydırmalı şerit */
   .featured-rail {
     display: grid;
+    grid-template-columns: minmax(0, 1fr);
     gap: var(--space-m);
   }
   .featured-rail[data-count='1'] {
@@ -130,7 +131,7 @@ const systemsPreview = systems.length > 0 ? systems.slice(0, 4) : [];
       gap: var(--space-l);
     }
     .featured-rail[data-count='2'] {
-      grid-template-columns: repeat(2, 1fr);
+      grid-template-columns: repeat(2, minmax(0, 1fr));
     }
     .featured-rail--scroll > :global(.pcard) {
       flex-basis: 20rem;

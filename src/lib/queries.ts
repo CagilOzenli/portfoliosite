@@ -96,6 +96,7 @@ const SYSTEMS_CARD_FIELDS = /* groq */ `
   "slug": slug.current,
   summary,
   engine,
+  youtubeVideoId,
   order
 `;
 

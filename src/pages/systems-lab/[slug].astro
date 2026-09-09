@@ -49,6 +49,15 @@ const sections: { title: string; text?: string }[] = [
     </header>
 
     {
+      entry.youtubeVideoId && (
+        <div class="cs__hero-video">
+          <YouTubeEmbed videoId={entry.youtubeVideoId} title={entry.title} />
+          <ArchitectureNote text={entry.architectureNote} />
+        </div>
+      )
+    }
+
+    {
       meta.length > 0 && (
         <dl class="cs__meta">
           {meta.map((m) => (
@@ -101,16 +110,6 @@ const sections: { title: string; text?: string }[] = [
     }
 
     {
-      entry.youtubeVideoId && (
-        <section class="cs__section">
-          <h2>Video walkthrough</h2>
-          <YouTubeEmbed videoId={entry.youtubeVideoId} title={entry.title} />
-          <ArchitectureNote text={entry.architectureNote} />
-        </section>
-      )
-    }
-
-    {
       entry.codeFlowSteps && entry.codeFlowSteps.length > 0 && (
         <section class="cs__section">
           <h2>Code flow</h2>
@@ -151,6 +150,14 @@ const sections: { title: string; text?: string }[] = [
     font-size: var(--text-1);
     color: var(--text-muted);
     max-width: 46ch;
+  }
+  .cs__hero-video {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-s);
+  }
+  .cs__hero-video :global(.yt) {
+    border-radius: var(--radius-l);
   }
   .cs__meta {
     display: grid;
