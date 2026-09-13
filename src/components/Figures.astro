@@ -18,14 +18,20 @@ const list = (images ?? []).filter((img) => img?.asset);
     <figure class="figures">
       {label && <figcaption class="figures__label kicker">{label}</figcaption>}
       <div class="figures__grid">
-        {list.map((img) => (
-          <img
-            src={thumbUrl(img, 1400, 0) ?? ''}
-            alt={imageAlt(img, label ?? 'Screenshot')}
-            loading="lazy"
-            decoding="async"
-          />
-        ))}
+        {list.map((img) => {
+          const caption = img?.alt?.trim();
+          return (
+            <figure class="figures__item">
+              <img
+                src={thumbUrl(img, 1400, 0) ?? ''}
+                alt={imageAlt(img, label ?? 'Screenshot')}
+                loading="lazy"
+                decoding="async"
+              />
+              {caption && <figcaption class="figures__caption">{caption}</figcaption>}
+            </figure>
+          );
+        })}
       </div>
     </figure>
   )
@@ -43,11 +49,23 @@ const list = (images ?? []).filter((img) => img?.asset);
     display: grid;
     gap: var(--space-s);
   }
+  .figures__item {
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2xs);
+  }
   .figures__grid img {
     width: 100%;
     border: 1px solid var(--border);
     border-radius: var(--radius);
     background: var(--bg-elevated);
+  }
+  /* Sanity'deki "Alt text" alanı — CMS'te girildiyse görsel altı yazı olarak da gösterilir */
+  .figures__caption {
+    font-family: var(--font-mono);
+    font-size: var(--text--1);
+    color: var(--text-faint);
   }
   @media (min-width: 44rem) {
     .figures__grid {

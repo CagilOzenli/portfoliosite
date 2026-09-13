@@ -21,8 +21,6 @@ const [featured, systems] = await Promise.all([
 // En fazla 4 featured kart — hepsi gerçek proje. Yoksa bölüm hiç çıkmaz
 // (yer tutucu / "work in progress" görüntüsü yok).
 const featuredCards = featured.slice(0, 4);
-// 3+ kart olduğunda yatay kaydırmalı şeride döner.
-const featuredScroll = featuredCards.length >= 3;
 const systemsPreview = systems.length > 0 ? systems.slice(0, 4) : [];
 ---
 
@@ -39,10 +37,7 @@ const systemsPreview = systems.length > 0 ? systems.slice(0, 4) : [];
         <section aria-labelledby="featured-title">
           <div class="container">
             <SectionHeading kicker="Selected Work" title="Featured projects" id="featured-title" />
-            <div
-              class:list={['featured-rail', { 'featured-rail--scroll': featuredScroll }]}
-              data-count={featuredCards.length}
-            >
+            <div class="featured-rail">
               {featuredCards.map((p) => <ProjectCard project={p} />)}
             </div>
             <a class="arrow-link section-more" href="/work">
@@ -59,7 +54,7 @@ const systemsPreview = systems.length > 0 ? systems.slice(0, 4) : [];
         <SectionHeading kicker="Systems Lab" title="Gameplay systems, broken down" id="lab-title">
           <p>Focused write-ups of individual mechanics — movement, interaction, combat, UI &amp; input.</p>
         </SectionHeading>
-        <div class="grid-systems">
+        <div class="systems-rail">
           {
             systemsPreview.length > 0
               ? systemsPreview.map((e) => <SystemsLabCard entry={e} />)
@@ -80,18 +75,17 @@ const systemsPreview = systems.length > 0 ? systems.slice(0, 4) : [];
 </BaseLayout>
 
 <style>
-  /* Featured: 1–2 kart sade grid, 3+ kart yatay kaydırmalı şerit */
-  .featured-rail {
-    display: grid;
-    grid-template-columns: minmax(0, 1fr);
-    gap: var(--space-m);
-  }
-  .featured-rail[data-count='1'] {
-    max-width: 34rem;
-  }
-
-  .featured-rail--scroll {
+  /*
+   * Featured / Systems Lab şeritleri — her zaman yatay kaydırmalı.
+   * Kartlar `flex-shrink: 0` olduğu için sığdıkları sürece satıra
+   * yayılır (grow); sığmadıklarında (çok kart ya da dar ekran)
+   * genişlikte sabit kalıp taşar → doğal olarak "yana kaydır"a döner.
+   * Böylece 1 kart da, 4 kart da aynı bileşenle doğru davranır.
+   */
+  .featured-rail,
+  .systems-rail {
     display: flex;
+    flex-wrap: nowrap;
     gap: var(--space-m);
     overflow-x: auto;
     overscroll-behavior-x: contain;
@@ -103,53 +97,57 @@ const systemsPreview = systems.length > 0 ? systems.slice(0, 4) : [];
     scrollbar-width: thin;
     scrollbar-color: var(--border-strong) transparent;
   }
-  .featured-rail--scroll > :global(.pcard) {
-    flex: 0 0 min(82%, 21rem);
+  .featured-rail > :global(.pcard) {
+    flex: 1 0 min(82%, 21rem);
+    max-width: 24rem;
     scroll-snap-align: start;
   }
-  .featured-rail--scroll::-webkit-scrollbar {
+  .systems-rail > :global(.scard) {
+    flex: 1 0 min(70%, 16rem);
+    max-width: 20rem;
+    scroll-snap-align: start;
+  }
+  .featured-rail::-webkit-scrollbar,
+  .systems-rail::-webkit-scrollbar {
     height: 6px;
   }
-  .featured-rail--scroll::-webkit-scrollbar-thumb {
+  .featured-rail::-webkit-scrollbar-thumb,
+  .systems-rail::-webkit-scrollbar-thumb {
     background: var(--border-strong);
     border-radius: var(--radius-pill);
   }
 
-  /* Systems Lab: spec gereği mobilde de 2 sütun */
-  .grid-systems {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: var(--space-s);
-  }
   .section-more {
     display: inline-flex;
     margin-top: var(--space-l);
   }
 
   @media (min-width: 40rem) {
-    .featured-rail {
+    .featured-rail,
+    .systems-rail {
       gap: var(--space-l);
     }
-    .featured-rail[data-count='2'] {
-      grid-template-columns: repeat(2, minmax(0, 1fr));
-    }
-    .featured-rail--scroll > :global(.pcard) {
+    .featured-rail > :global(.pcard) {
       flex-basis: 20rem;
+      max-width: 26rem;
     }
-    .grid-systems {
-      gap: var(--space-m);
+    .systems-rail > :global(.scard) {
+      flex-basis: 16rem;
+      max-width: 22rem;
     }
   }
 
   @media (min-width: 64rem) {
-    .featured-rail--scroll {
+    .featured-rail,
+    .systems-rail {
       margin-inline: 0;
       padding-inline: 0;
     }
   }
 
   @media (prefers-reduced-motion: no-preference) {
-    .featured-rail--scroll {
+    .featured-rail,
+    .systems-rail {
       scroll-behavior: smooth;
     }
   }

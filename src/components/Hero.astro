@@ -24,12 +24,16 @@ const email = contact.email || settings.social.email;
   <AsciiHero />
 
   <button type="button" class="hero__egg" data-si-play>
-    <svg class="hero__egg-i" width="9" height="11" viewBox="0 0 9 11" aria-hidden="true">
-      <path d="M0 0l9 5.5L0 11z" fill="currentColor" />
-    </svg>
-    play
-    <span class="hero__egg-note">
-      <span class="hero__egg-long">the background is </span>playable<span class="hero__egg-long"> — space invaders</span>
+    <span class="hero__egg-badge" aria-hidden="true">
+      <svg class="hero__egg-i" width="9" height="11" viewBox="0 0 9 11">
+        <path d="M0 0l9 5.5L0 11z" fill="currentColor" />
+      </svg>
+    </span>
+    <span class="hero__egg-label">
+      <span class="hero__egg-play">play</span>
+      <span class="hero__egg-note">
+        <span class="hero__egg-long">the background is </span>playable<span class="hero__egg-long"> — space invaders</span>
+      </span>
     </span>
   </button>
 
@@ -59,32 +63,79 @@ const email = contact.email || settings.social.email;
     border-bottom: 1px solid var(--border);
   }
 
-  /* header'ın hemen altında küçük easter-egg tetikleyicisi */
+  /*
+   * Header'ın hemen altında, oynanabilir olduğunu belli eden bir "rozet"
+   * — düz metin linkiyle karışmasın diye kenarlık/arka plan + hafif
+   * nabız animasyonlu play ikonu.
+   */
   .hero__egg {
     position: absolute;
     top: var(--space-s);
     left: var(--gutter);
     z-index: 3;
     display: inline-flex;
-    align-items: baseline;
-    gap: 0.4rem;
-    background: none;
-    border: 0;
-    padding: 0.15rem 0;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.3rem 0.85rem 0.3rem 0.3rem;
+    border: 1px solid var(--border-strong);
+    border-radius: var(--radius-pill);
+    background: color-mix(in srgb, var(--bg-elevated) 72%, transparent);
+    backdrop-filter: blur(3px);
     font-family: var(--font-mono);
     font-size: var(--text--1);
     color: var(--accent);
     cursor: pointer;
+    transition: border-color var(--transition), background var(--transition), transform var(--transition);
+  }
+  .hero__egg:hover,
+  .hero__egg:focus-visible {
+    border-color: var(--accent);
+    background: color-mix(in srgb, var(--bg-elevated) 92%, transparent);
+    transform: translateY(-1px);
+  }
+  .hero__egg-badge {
+    position: relative;
+    display: grid;
+    place-items: center;
+    flex: none;
+    width: 1.6rem;
+    height: 1.6rem;
+    border-radius: 50%;
+    background: color-mix(in srgb, var(--accent-amber) 22%, transparent);
   }
   .hero__egg-i {
     color: var(--accent-amber);
-    align-self: center;
+    /* SVG optik olarak sola kaymış görünüyor — ortala */
+    transform: translateX(1px);
+  }
+  .hero__egg-badge::after {
+    content: '';
+    position: absolute;
+    inset: -3px;
+    border-radius: 50%;
+    border: 1px solid var(--accent-amber);
+    opacity: 0;
+  }
+  @media (prefers-reduced-motion: no-preference) {
+    .hero__egg-badge::after {
+      animation: egg-pulse 2.6s ease-out infinite;
+    }
+  }
+  @keyframes egg-pulse {
+    0% { opacity: 0.55; transform: scale(0.85); }
+    70%, 100% { opacity: 0; transform: scale(1.55); }
+  }
+  .hero__egg-label {
+    display: inline-flex;
+    align-items: baseline;
+    gap: 0.45ch;
+  }
+  .hero__egg-play {
+    color: var(--text-strong);
+    font-weight: var(--weight-bold);
   }
   .hero__egg-note {
     color: var(--text-faint);
-  }
-  .hero__egg:hover {
-    color: var(--link-hover);
   }
   .hero__egg:hover .hero__egg-note {
     color: var(--text-muted);
