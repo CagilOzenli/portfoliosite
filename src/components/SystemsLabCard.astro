@@ -44,9 +44,9 @@ const videoId = entry?.youtubeVideoId?.trim() || null;
     {entry?.summary && <p class="scard__summary">{entry.summary}</p>}
     {
       href && (
-        <span class="arrow-link scard__cta">
+        <a class="arrow-link scard__cta" href={href}>
           Open <Icon name="arrow" size={14} />
-        </span>
+        </a>
       )
     }
   </div>
