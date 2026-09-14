@@ -4,6 +4,7 @@
  * Her adım: numara + stepTitle + screenshot + explanation.
  * `order` alanına göre sıralanır; order yoksa CMS sırası korunur.
  */
+import Icon from './Icon.astro';
 import { thumbUrl, imageAlt } from '../lib/image';
 import type { CodeFlowStep } from '../lib/types';
 
@@ -19,9 +20,12 @@ const ordered = [...steps]
 
 {
   ordered.length > 0 && (
+    <>
     <ol class="flow">
       {ordered.map((step, i) => {
         const img = thumbUrl(step.screenshot, 1400, 0);
+        const full = thumbUrl(step.screenshot, 2200, 0);
+        const alt = imageAlt(step.screenshot, step.stepTitle);
         return (
           <li class="flow__step">
             <div class="flow__marker" aria-hidden="true">
@@ -31,13 +35,21 @@ const ordered = [...steps]
             <div class="flow__body">
               <h3 class="flow__title">{step.stepTitle}</h3>
               {img && (
-                <img
-                  class="flow__shot"
-                  src={img}
-                  alt={imageAlt(step.screenshot, step.stepTitle)}
-                  loading="lazy"
-                  decoding="async"
-                />
+                <button
+                  type="button"
+                  class="flow__shot-btn"
+                  data-flow-shot={full ?? img}
+                  data-flow-alt={alt}
+                  aria-label={`Enlarge screenshot: ${step.stepTitle}`}
+                >
+                  <img
+                    class="flow__shot"
+                    src={img}
+                    alt={alt}
+                    loading="lazy"
+                    decoding="async"
+                  />
+                </button>
               )}
               {step.explanation?.trim() && (
                 <p class="flow__text">{step.explanation}</p>
@@ -47,6 +59,14 @@ const ordered = [...steps]
         );
       })}
     </ol>
+
+    <div class="flow-lightbox" data-flow-lightbox hidden>
+      <button type="button" class="flow-lightbox__close" data-flow-lightbox-close aria-label="Close enlarged screenshot">
+        <Icon name="close" size={18} />
+      </button>
+      <img class="flow-lightbox__img" data-flow-lightbox-img src="" alt="" />
+    </div>
+    </>
   )
 }
 
@@ -99,11 +119,69 @@ const ordered = [...steps]
     font-weight: var(--weight-normal);
     color: var(--text-strong);
   }
+  .flow__shot-btn {
+    display: block;
+    width: 100%;
+    padding: 0;
+    border: 0;
+    background: none;
+    cursor: zoom-in;
+  }
   .flow__shot {
+    display: block;
     width: 100%;
     border: 1px solid var(--border);
     border-radius: var(--radius);
     background: var(--bg-elevated);
+    transition: border-color var(--transition);
+  }
+  .flow__shot-btn:hover .flow__shot,
+  .flow__shot-btn:focus-visible .flow__shot {
+    border-color: var(--border-strong);
+  }
+
+  /* Büyütülmüş görsel — tam ekran overlay */
+  .flow-lightbox {
+    position: fixed;
+    inset: 0;
+    z-index: var(--z-nav-overlay);
+    display: grid;
+    place-items: center;
+    padding: var(--space-l);
+    background: color-mix(in srgb, var(--brand-void) 88%, transparent);
+    backdrop-filter: blur(2px);
+    cursor: zoom-out;
+  }
+  .flow-lightbox[hidden] {
+    display: none;
+  }
+  .flow-lightbox__img {
+    max-width: 100%;
+    max-height: 100%;
+    border: 1px solid var(--border-strong);
+    border-radius: var(--radius);
+    cursor: default;
+    box-shadow: 0 30px 80px -20px #000;
+  }
+  .flow-lightbox__close {
+    position: absolute;
+    top: var(--space-m);
+    right: var(--space-m);
+    display: grid;
+    place-items: center;
+    width: 2.5rem;
+    height: 2.5rem;
+    border: 1px solid var(--border-strong);
+    border-radius: 50%;
+    background: color-mix(in srgb, var(--bg) 70%, transparent);
+    color: var(--text);
+    cursor: pointer;
+    transition: border-color var(--transition), color var(--transition);
+  }
+  .flow-lightbox__close:hover,
+  .flow-lightbox__close:focus-visible {
+    color: var(--accent);
+    border-color: var(--accent);
   }
   .flow__text {
     font-family: var(--font-mono);
@@ -121,3 +199,47 @@ const ordered = [...steps]
     }
   }
 </style>
+
+<script>
+  // Code flow ekran görüntülerine tıklayınca büyütülmüş halini gösteren
+  // basit lightbox. Sayfada tek bir CodeFlow bulunur, o yüzden overlay
+  // bir kez oluşturulur ve tüm [data-flow-shot] tetikleyicileri paylaşır.
+  const lightbox = document.querySelector<HTMLElement>('[data-flow-lightbox]');
+  const lbImg = document.querySelector<HTMLImageElement>('[data-flow-lightbox-img]');
+  const closeBtn = document.querySelector<HTMLElement>('[data-flow-lightbox-close]');
+
+  if (lightbox && lbImg) {
+    // `position: fixed` yalnızca üst öğelerden hiçbiri transform/filter
+    // uygulamıyorsa gerçekten viewport'a göre sabitlenir — scroll-reveal
+    // animasyonu (data-reveal) bu öğeyi geçici olarak transform'luyor.
+    // Overlay'i body'nin doğrudan altına taşıyarak bundan bağımsız hale
+    // getiriyoruz.
+    document.body.appendChild(lightbox);
+
+    const open = (src: string, alt: string) => {
+      lbImg.src = src;
+      lbImg.alt = alt;
+      lightbox.hidden = false;
+      document.documentElement.style.overflow = 'hidden';
+    };
+    const close = () => {
+      lightbox.hidden = true;
+      lbImg.removeAttribute('src');
+      document.documentElement.style.overflow = '';
+    };
+
+    document.querySelectorAll<HTMLButtonElement>('[data-flow-shot]').forEach((btn) => {
+      btn.addEventListener('click', () => {
+        const src = btn.dataset.flowShot;
+        if (src) open(src, btn.dataset.flowAlt ?? '');
+      });
+    });
+    closeBtn?.addEventListener('click', close);
+    lightbox.addEventListener('click', (e) => {
+      if (e.target === lightbox) close();
+    });
+    window.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && !lightbox.hidden) close();
+    });
+  }
+</script>
