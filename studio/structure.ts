@@ -71,13 +71,11 @@ export const structure: StructureResolver = (S, context) =>
         context,
       }),
 
-      S.listItem()
-        .title('Systems Lab')
-        .icon(ComponentIcon)
-        .schemaType('systemsLabEntry')
-        .child(
-          S.documentTypeList('systemsLabEntry')
-            .title('Systems Lab')
-            .defaultOrdering([{ field: 'order', direction: 'asc' }]),
-        ),
+      orderableDocumentListDeskItem({
+        type: 'systemsLabEntry',
+        title: 'Systems Lab',
+        icon: ComponentIcon,
+        S,
+        context,
+      }),
     ]);

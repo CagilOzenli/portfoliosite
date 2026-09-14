@@ -1,5 +1,6 @@
 import { defineType, defineField } from 'sanity';
 import { ComponentIcon } from '@sanity/icons';
+import { orderRankField, orderRankOrdering } from '@sanity/orderable-document-list';
 
 const imageArray = {
   type: 'array' as const,
@@ -141,18 +142,13 @@ export default defineType({
       initialValue: true,
       description: 'Yayında olsa bile bunu kapatarak siteden geçici olarak gizleyebilirsin.',
     }),
-    defineField({
-      name: 'order',
-      title: 'Order',
-      type: 'number',
-      group: 'meta',
-      initialValue: 100,
-      description: 'Küçük sayı önce gelir.',
-    }),
+    // Sürükle-bırak sıralama alanı (Systems Lab listesinde). En üstteki
+    // sitede de en başta görünür.
+    { ...orderRankField({ type: 'systemsLabEntry' }), group: 'meta' },
   ],
 
   orderings: [
-    { title: 'Manual order', name: 'orderAsc', by: [{ field: 'order', direction: 'asc' }] },
+    orderRankOrdering,
     { title: 'Title A→Z', name: 'titleAsc', by: [{ field: 'title', direction: 'asc' }] },
   ],
 

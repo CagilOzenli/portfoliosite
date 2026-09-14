@@ -97,12 +97,12 @@ const SYSTEMS_CARD_FIELDS = /* groq */ `
   summary,
   engine,
   youtubeVideoId,
-  order
+  orderRank
 `;
 
 export const SYSTEMS_LAB_LIST_QUERY = /* groq */ `
 *[_type == "systemsLabEntry" && published == true && visible == true]
-  | order(order asc, title asc){
+  | order(orderRank){
   ${SYSTEMS_CARD_FIELDS}
 }`;
 

@@ -140,7 +140,7 @@ export interface SystemsLabEntry {
   codeFlowSteps?: CodeFlowStep[];
   visible?: boolean;
   published?: boolean;
-  order?: number;
+  orderRank?: string;
 }
 
 /** Kart etiketi: status alanından okunur, yoksa generic placeholder. */
