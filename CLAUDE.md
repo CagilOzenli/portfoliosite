@@ -5,7 +5,10 @@ Full setup & deploy runbook: **`README.md`**.
 
 ## Non-negotiable rules
 
-- **Tone:** junior, honest. Never present Çağıl as senior/expert/veteran.
+- **Tone:** honest, never senior/expert/veteran — but don't lead with "junior" as
+  self-deprecation either. Frame copy around what Çağıl builds (gameplay systems,
+  specific projects); mention entry-level/internship openness as a practical note,
+  not the opening line. No years-of-experience or seniority claims either way.
 - **No fabricated content.** No made-up projects, experience, awards, stats, or
   references. Unpublished/invisible content must stay hidden; keep empty-state fallbacks.
 - **Design lives in code only.** All colors/sizing in `src/styles/tokens.css`
